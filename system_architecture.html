@@ -138,6 +138,12 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        .new-feature {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
@@ -209,6 +215,17 @@
             <li><strong>Web Crawler</strong>: Dual-crawler system with Simple Crawler (requests/BeautifulSoup) as primary and Playwright as fallback</li>
             <li><strong>Risk Engine</strong>: FastAPI-based service that evaluates company risk based on financial metrics</li>
         </ul>
+        
+        <div class="new-feature">
+            <h3>Enhanced Features (April 2025 Update)</h3>
+            <ul>
+                <li><strong>Improved Company Detection</strong>: Automatic identification of well-known companies from natural language queries</li>
+                <li><strong>Stock Symbol Integration</strong>: Automatic lookup of stock symbols for recognized companies</li>
+                <li><strong>Multiple Data Sources</strong>: Integration with financial data services (Yahoo Finance, MarketWatch) for comprehensive analysis</li>
+                <li><strong>Enhanced Financial Metrics</strong>: Extraction and display of revenue, market cap, and other metrics with appropriate units (billions, millions)</li>
+                <li><strong>Detailed Financial Health Analysis</strong>: In-depth assessment of debt ratios, profitability, and market position</li>
+            </ul>
+        </div>
     </div>
 
     <div class="container">
@@ -298,7 +315,9 @@
             <li>
                 <strong>Risk Analysis</strong>: If the request is for company risk analysis, the agent:
                 <ul>
-                    <li>Crawls the company website</li>
+                    <li>Identifies the company from the message (e.g., "analyze risk for Apple")</li>
+                    <li>Looks up the stock symbol for well-known companies</li>
+                    <li>Crawls financial data sources (Yahoo Finance, MarketWatch)</li>
                     <li>Extracts financial metrics using pattern matching</li>
                     <li>Sends the data to the Risk Engine API</li>
                     <li>Processes and formats the risk assessment results</li>
@@ -313,7 +332,7 @@
     <div class="container">
         <h2>Risk Analysis Process</h2>
         <p>
-            The risk analysis process involves extracting financial metrics from website content and evaluating company risk.
+            The enhanced risk analysis process involves extracting financial metrics from multiple data sources and evaluating company risk with detailed financial health metrics.
         </p>
 
         <div class="diagram">
@@ -325,67 +344,83 @@
                 <rect x="50" y="50" width="150" height="80" rx="5" ry="5" fill="#3498db" />
                 <text x="125" y="95" text-anchor="middle" fill="white" font-weight="bold">Company Website</text>
                 
+                <!-- Financial Sources -->
+                <rect x="50" y="150" width="150" height="80" rx="5" ry="5" fill="#2ecc71" />
+                <text x="125" y="175" text-anchor="middle" fill="white" font-weight="bold">Financial Data</text>
+                <text x="125" y="195" text-anchor="middle" fill="white" font-weight="bold">Sources</text>
+                
                 <!-- Web Crawler -->
-                <rect x="50" y="200" width="150" height="80" rx="5" ry="5" fill="#e74c3c" />
-                <text x="125" y="245" text-anchor="middle" fill="white" font-weight="bold">Web Crawler</text>
+                <rect x="50" y="250" width="150" height="80" rx="5" ry="5" fill="#e74c3c" />
+                <text x="125" y="295" text-anchor="middle" fill="white" font-weight="bold">Web Crawler</text>
                 
                 <!-- Content Extraction -->
-                <rect x="250" y="200" width="150" height="80" rx="5" ry="5" fill="#9b59b6" />
-                <text x="325" y="245" text-anchor="middle" fill="white" font-weight="bold">Content Extraction</text>
+                <rect x="250" y="250" width="150" height="80" rx="5" ry="5" fill="#9b59b6" />
+                <text x="325" y="295" text-anchor="middle" fill="white" font-weight="bold">Content Extraction</text>
                 
                 <!-- Financial Metrics -->
-                <rect x="450" y="200" width="150" height="80" rx="5" ry="5" fill="#f39c12" />
-                <text x="525" y="230" text-anchor="middle" fill="white" font-weight="bold">Financial</text>
-                <text x="525" y="260" text-anchor="middle" fill="white" font-weight="bold">Metrics Extraction</text>
+                <rect x="450" y="250" width="150" height="80" rx="5" ry="5" fill="#f39c12" />
+                <text x="525" y="280" text-anchor="middle" fill="white" font-weight="bold">Financial</text>
+                <text x="525" y="310" text-anchor="middle" fill="white" font-weight="bold">Metrics Extraction</text>
                 
                 <!-- Risk Engine -->
-                <rect x="650" y="200" width="150" height="80" rx="5" ry="5" fill="#2ecc71" />
-                <text x="725" y="245" text-anchor="middle" fill="white" font-weight="bold">Risk Engine</text>
+                <rect x="650" y="250" width="150" height="80" rx="5" ry="5" fill="#2ecc71" />
+                <text x="725" y="295" text-anchor="middle" fill="white" font-weight="bold">Risk Engine</text>
                 
                 <!-- Risk Assessment -->
-                <rect x="350" y="350" width="150" height="80" rx="5" ry="5" fill="#1abc9c" />
-                <text x="425" y="390" text-anchor="middle" fill="white" font-weight="bold">Risk Assessment</text>
+                <rect x="350" y="380" width="150" height="80" rx="5" ry="5" fill="#1abc9c" />
+                <text x="425" y="420" text-anchor="middle" fill="white" font-weight="bold">Risk Assessment</text>
                 
                 <!-- Connections -->
-                <line x1="125" y1="130" x2="125" y2="200" stroke="#333" stroke-width="2" />
-                <line x1="200" y1="240" x2="250" y2="240" stroke="#333" stroke-width="2" />
-                <line x1="400" y1="240" x2="450" y2="240" stroke="#333" stroke-width="2" />
-                <line x1="600" y1="240" x2="650" y2="240" stroke="#333" stroke-width="2" />
-                <line x1="725" y1="280" x2="725" y2="320" stroke="#333" stroke-width="2" />
-                <line x1="725" y1="320" x2="450" y2="350" stroke="#333" stroke-width="2" />
+                <line x1="125" y1="130" x2="125" y2="150" stroke="#333" stroke-width="2" />
+                <line x1="125" y1="230" x2="125" y2="250" stroke="#333" stroke-width="2" />
+                <line x1="200" y1="290" x2="250" y2="290" stroke="#333" stroke-width="2" />
+                <line x1="400" y1="290" x2="450" y2="290" stroke="#333" stroke-width="2" />
+                <line x1="600" y1="290" x2="650" y2="290" stroke="#333" stroke-width="2" />
+                <line x1="725" y1="330" x2="725" y2="350" stroke="#333" stroke-width="2" />
+                <line x1="725" y1="350" x2="450" y2="380" stroke="#333" stroke-width="2" />
                 
                 <!-- Arrows -->
-                <polygon points="125,198 121,190 129,190" fill="#333" />
-                <polygon points="248,240 240,236 240,244" fill="#333" />
-                <polygon points="448,240 440,236 440,244" fill="#333" />
-                <polygon points="648,240 640,236 640,244" fill="#333" />
-                <polygon points="450,348 455,340 445,340" fill="#333" />
+                <polygon points="125,148 121,140 129,140" fill="#333" />
+                <polygon points="125,248 121,240 129,240" fill="#333" />
+                <polygon points="248,290 240,286 240,294" fill="#333" />
+                <polygon points="448,290 440,286 440,294" fill="#333" />
+                <polygon points="648,290 640,286 640,294" fill="#333" />
+                <polygon points="450,378 455,370 445,370" fill="#333" />
                 
                 <!-- Metrics Labels -->
-                <rect x="520" y="100" width="120" height="25" rx="5" ry="5" fill="#e74c3c" />
-                <text x="580" y="118" text-anchor="middle" fill="white" font-size="12">Debt-to-Equity</text>
+                <rect x="520" y="80" width="120" height="25" rx="5" ry="5" fill="#e74c3c" />
+                <text x="580" y="98" text-anchor="middle" fill="white" font-size="12">Debt-to-Equity</text>
                 
-                <rect x="520" y="130" width="120" height="25" rx="5" ry="5" fill="#f39c12" />
-                <text x="580" y="148" text-anchor="middle" fill="white" font-size="12">Net Profit</text>
+                <rect x="520" y="110" width="120" height="25" rx="5" ry="5" fill="#f39c12" />
+                <text x="580" y="128" text-anchor="middle" fill="white" font-size="12">Net Profit</text>
                 
-                <rect x="520" y="160" width="120" height="25" rx="5" ry="5" fill="#2ecc71" />
-                <text x="580" y="178" text-anchor="middle" fill="white" font-size="12">News Sentiment</text>
+                <rect x="520" y="140" width="120" height="25" rx="5" ry="5" fill="#2ecc71" />
+                <text x="580" y="158" text-anchor="middle" fill="white" font-size="12">News Sentiment</text>
                 
-                <rect x="650" y="100" width="120" height="25" rx="5" ry="5" fill="#3498db" />
-                <text x="710" y="118" text-anchor="middle" fill="white" font-size="12">Late Payments</text>
+                <rect x="650" y="80" width="120" height="25" rx="5" ry="5" fill="#3498db" />
+                <text x="710" y="98" text-anchor="middle" fill="white" font-size="12">Late Payments</text>
                 
-                <rect x="650" y="130" width="120" height="25" rx="5" ry="5" fill="#9b59b6" />
-                <text x="710" y="148" text-anchor="middle" fill="white" font-size="12">Business Sector</text>
+                <rect x="650" y="110" width="120" height="25" rx="5" ry="5" fill="#9b59b6" />
+                <text x="710" y="128" text-anchor="middle" fill="white" font-size="12">Business Sector</text>
+                
+                <!-- New Metrics -->
+                <rect x="520" y="170" width="120" height="25" rx="5" ry="5" fill="#1abc9c" />
+                <text x="580" y="188" text-anchor="middle" fill="white" font-size="12">Revenue</text>
+                
+                <rect x="650" y="140" width="120" height="25" rx="5" ry="5" fill="#f1c40f" />
+                <text x="710" y="158" text-anchor="middle" fill="white" font-size="12">Market Cap</text>
                 
                 <!-- Lines to Metrics -->
-                <line x1="525" y1="200" x2="580" y2="125" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
-                <line x1="525" y1="200" x2="580" y2="155" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
-                <line x1="525" y1="200" x2="580" y2="185" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
-                <line x1="525" y1="200" x2="710" y2="125" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
-                <line x1="525" y1="200" x2="710" y2="155" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="580" y2="98" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="580" y2="128" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="580" y2="158" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="710" y2="98" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="710" y2="128" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="580" y2="188" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="250" x2="710" y2="158" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
             </svg>
             <div class="diagram-caption">
-                Figure 3: Risk Analysis Process Flow
+                Figure 3: Enhanced Risk Analysis Process Flow
             </div>
         </div>
 
@@ -420,6 +455,18 @@
                 Rate of late payments to suppliers and creditors, indicating potential cash flow issues.
             </div>
             <div class="risk-factor-weight">25%</div>
+        </div>
+
+        <div class="new-feature">
+            <h3>Enhanced Financial Metrics (New)</h3>
+            <p>In addition to the core risk factors, the system now extracts and analyzes additional financial metrics:</p>
+            <ul>
+                <li><strong>Revenue</strong>: Company's total sales or income before deducting expenses</li>
+                <li><strong>Market Capitalization</strong>: Total market value of a company's outstanding shares</li>
+                <li><strong>Profit Margin</strong>: Calculated ratio of profit to revenue, indicating efficiency</li>
+                <li><strong>Financial Health Assessment</strong>: Detailed analysis of leverage, profitability, and market position</li>
+            </ul>
+            <p>These metrics provide a more comprehensive view of the company's financial situation and are factored into the risk assessment and recommendations.</p>
         </div>
 
         <h3>Risk Levels</h3>
@@ -496,7 +543,7 @@
     <div class="container">
         <h2>Financial Metrics Extraction</h2>
         <p>
-            The system uses pattern matching to extract financial metrics from company websites.
+            The system uses pattern matching to extract financial metrics from company websites and financial data sources.
         </p>
 
         <div class="diagram">
@@ -506,15 +553,15 @@
                 
                 <!-- Website Content -->
                 <rect x="50" y="50" width="300" height="250" rx="5" ry="5" fill="#ecf0f1" stroke="#bdc3c7" />
-                <text x="200" y="80" text-anchor="middle" fill="#333" font-weight="bold">Website Content</text>
+                <text x="200" y="80" text-anchor="middle" fill="#333" font-weight="bold">Financial Data Sources</text>
                 
                 <rect x="70" y="100" width="260" height="180" rx="5" ry="5" fill="#f9f9f9" stroke="#ddd" />
                 <text x="80" y="120" fill="#333" font-size="12">... The company reported a debt-to-equity</text>
                 <text x="80" y="140" fill="#333" font-size="12">ratio of 1.5 for the fiscal year ... </text>
                 <text x="80" y="170" fill="#333" font-size="12">... Net profit decreased to -$2.3 million</text>
                 <text x="80" y="190" fill="#333" font-size="12">due to increased operating expenses ...</text>
-                <text x="80" y="220" fill="#333" font-size="12">... Our technology sector outlook remains</text>
-                <text x="80" y="240" fill="#333" font-size="12">positive despite market challenges ...</text>
+                <text x="80" y="220" fill="#333" font-size="12">... Market cap of $2.87 trillion with</text>
+                <text x="80" y="240" fill="#333" font-size="12">revenue of $383.29 billion for 2024 ...</text>
                 
                 <!-- Regex Patterns -->
                 <rect x="450" y="50" width="300" height="250" rx="5" ry="5" fill="#3498db" />
@@ -527,10 +574,10 @@
                 <text x="600" y="170" text-anchor="middle" fill="white" font-size="12">net profit.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)</text>
                 
                 <rect x="470" y="190" width="260" height="30" rx="5" ry="5" fill="#2980b9" />
-                <text x="600" y="210" text-anchor="middle" fill="white" font-size="12">sector keywords detection</text>
+                <text x="600" y="210" text-anchor="middle" fill="white" font-size="12">market cap.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)</text>
                 
                 <rect x="470" y="230" width="260" height="30" rx="5" ry="5" fill="#2980b9" />
-                <text x="600" y="250" text-anchor="middle" fill="white" font-size="12">negative sentiment analysis</text>
+                <text x="600" y="250" text-anchor="middle" fill="white" font-size="12">revenue.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)</text>
                 
                 <!-- Arrows -->
                 <line x1="350" y1="130" x2="470" y2="125" stroke="#333" stroke-width="2" />
@@ -539,21 +586,30 @@
                 <line x1="350" y1="180" x2="470" y2="165" stroke="#333" stroke-width="2" />
                 <polygon points="468,165 460,161 460,169" fill="#333" />
                 
-                <line x1="350" y1="230" x2="470" y2="205" stroke="#333" stroke-width="2" />
+                <line x1="350" y1="220" x2="470" y2="205" stroke="#333" stroke-width="2" />
                 <polygon points="468,205 460,201 460,209" fill="#333" />
+                
+                <line x1="350" y1="240" x2="470" y2="245" stroke="#333" stroke-width="2" />
+                <polygon points="468,245 460,241 460,249" fill="#333" />
             </svg>
             <div class="diagram-caption">
-                Figure 4: Financial Metrics Extraction Process
+                Figure 4: Enhanced Financial Metrics Extraction Process
             </div>
         </div>
 
-        <h3>Extraction Techniques</h3>
+        <h3>Enhanced Extraction Techniques</h3>
         <ul>
             <li>
                 <strong>Debt-to-Equity Ratio</strong>: Regex patterns to find mentions of debt-to-equity followed by numeric values
             </li>
             <li>
                 <strong>Net Profit</strong>: Patterns to extract profit/earnings figures, handling different formats ($2.3 million, $2,300,000)
+            </li>
+            <li>
+                <strong>Revenue</strong>: Extracts total sales figures with unit detection (billion/million) and proper scaling
+            </li>
+            <li>
+                <strong>Market Cap</strong>: Identifies market capitalization values with unit detection (trillion/billion/million)
             </li>
             <li>
                 <strong>Sector Detection</strong>: Keyword frequency analysis to determine the most likely business sector
@@ -566,6 +622,17 @@
             </li>
         </ul>
 
+        <div class="new-feature">
+            <h3>Unit and Scale Detection</h3>
+            <p>The system now identifies and properly scales financial figures based on their units:</p>
+            <ul>
+                <li><strong>Trillion Recognition</strong>: Detects and scales values expressed in trillions (e.g., $2.87T → $2,870,000,000,000)</li>
+                <li><strong>Billion Recognition</strong>: Detects and scales values expressed in billions (e.g., $383.29B → $383,290,000,000)</li>
+                <li><strong>Million Recognition</strong>: Detects and scales values expressed in millions (e.g., $42M → $42,000,000)</li>
+                <li><strong>Automatic Formatting</strong>: Displays values in appropriate units for readability (e.g., $2.87 trillion, $383.29 billion)</li>
+            </ul>
+        </div>
+
         <div class="note">
             <strong>Note:</strong> When specific metrics can't be found, the system uses default values:
             <ul>
@@ -574,6 +641,8 @@
                 <li>Negative News Score: 0.3 (moderate)</li>
                 <li>Late Payments Rate: 0.1 (moderate)</li>
                 <li>Sector: "general" (standard risk multiplier)</li>
+                <li>Revenue: 0 (default value)</li>
+                <li>Market Cap: 0 (default value)</li>
             </ul>
         </div>
     </div>
@@ -597,51 +666,64 @@
             <li><strong>Recommendation Engine</strong>: Generates tailored recommendations based on risk profile and business sector</li>
         </ul>
 
-        <h3>Agent Message Processing</h3>
+        <h3>Enhanced Agent Message Processing</h3>
         <ul>
-            <li><strong>Command Detection</strong>: Identifies web crawling commands (e.g., "scrape Tesla website")</li>
-            <li><strong>URL Construction</strong>: Automatically constructs URLs for known companies (e.g., "Apple" → "https://www.apple.com")</li>
-            <li><strong>Risk Query Detection</strong>: Identifies risk analysis requests (e.g., "analyze risk for Company X")</li>
-            <li><strong>Response Formatting</strong>: Formats risk assessments with scores, factors, and recommendations</li>
+            <li><strong>Company Detection</strong>: Automatically identifies companies mentioned in messages (e.g., "analyze risk for Apple")</li>
+            <li><strong>Stock Symbol Lookup</strong>: Maps well-known companies to their stock symbols for financial data retrieval</li>
+            <li><strong>Multi-Source Integration</strong>: Combines data from company websites and financial information sources</li>
+            <li><strong>Financial Data API Integration</strong>: Retrieves data from Yahoo Finance and MarketWatch by stock symbol</li>
+            <li><strong>Response Formatting</strong>: Displays financial data with appropriate units (billions, trillions) for readability</li>
         </ul>
     </div>
 
     <div class="container">
         <h2>Example Workflow</h2>
-        <p>Let's walk through a complete example of a risk analysis request:</p>
+        <p>Let's walk through a complete example of an enhanced risk analysis request:</p>
 
         <h3>1. User sends message:</h3>
         <div class="code-block">
-            "Analyze the risk for Tesla https://www.tesla.com/investor"
+            "Analyze the risk for Apple"
         </div>
 
         <h3>2. Agent detects risk analysis request</h3>
         <ul>
             <li>Identifies "analyze risk" as a risk analysis request</li>
-            <li>Extracts "Tesla" as the company name</li>
-            <li>Identifies "https://www.tesla.com/investor" as the URL to crawl</li>
+            <li>Extracts "Apple" as the company name</li>
+            <li>Looks up the stock symbol "AAPL" for Apple</li>
+            <li>Constructs financial data URL: "https://finance.yahoo.com/quote/AAPL"</li>
         </ul>
 
-        <h3>3. Web crawler extracts content</h3>
+        <h3>3. Multi-source data collection</h3>
         <ul>
-            <li>Simple Crawler retrieves the content from Tesla's investor relations page</li>
-            <li>Content is processed to remove HTML tags and extract plain text</li>
+            <li>Crawls Yahoo Finance to retrieve Apple's financial information</li>
+            <li>Optionally crawls MarketWatch for additional financial data</li>
+            <li>Combines the data from both sources</li>
         </ul>
 
-        <h3>4. Financial metrics extraction</h3>
+        <h3>4. Enhanced financial metrics extraction</h3>
         <ul>
             <li>The system uses pattern matching to extract financial data</li>
             <li>For example, it might find:</li>
             <ul>
                 <li>Debt-to-Equity Ratio: 1.2</li>
-                <li>Net Profit: $5.5 billion</li>
-                <li>Sector: Detected as "technology" (with automobile keywords)</li>
+                <li>Net Profit: $96.99 billion</li>
+                <li>Revenue: $383.29 billion</li>
+                <li>Market Cap: $2.87 trillion</li>
+                <li>Sector: Detected as "technology"</li>
                 <li>Negative News Score: 0.15 (calculated from content analysis)</li>
                 <li>Late Payments Rate: 0.1 (default value)</li>
             </ul>
         </ul>
 
-        <h3>5. Risk Engine calculation</h3>
+        <h3>5. Financial Health Analysis</h3>
+        <ul>
+            <li>Calculates profit margin: (96.99 / 383.29) * 100 = 25.3%</li>
+            <li>Analyzes debt-to-equity ratio: 1.2 (moderate leverage)</li>
+            <li>Assesses market position: $2.87T (market leader)</li>
+            <li>Provides detailed financial health assessment</li>
+        </ul>
+
+        <h3>6. Risk Engine calculation</h3>
         <ul>
             <li>Data is sent to the Risk Engine API</li>
             <li>API calculates a weighted score based on the factors</li>
@@ -650,11 +732,23 @@
             <li>Recommendations generated based on the low risk profile</li>
         </ul>
 
-        <h3>6. Response presentation</h3>
+        <h3>7. Enhanced response presentation</h3>
         <div class="code-block">
-            <strong>Risk Analysis for Tesla</strong><br><br>
+            <strong>Risk Analysis for Apple</strong><br><br>
             <strong>Risk Score</strong>: 30.0 / 100<br>
             <strong>Risk Level</strong>: Low Risk<br><br>
+            <strong>Financial Metrics</strong>:<br>
+            <strong>Revenue</strong>: $383.29 billion<br>
+            <strong>Market Cap</strong>: $2.87 trillion<br>
+            <strong>Debt-to-Equity Ratio</strong>: 1.2<br>
+            <strong>Net Profit</strong>: $96.99 billion<br>
+            <strong>Negative News Score</strong>: 0.15 (0-1 scale, higher is worse)<br>
+            <strong>Late Payments Rate</strong>: 0.1 (0-1 scale)<br>
+            <strong>Sector</strong>: Technology<br><br>
+            <strong>Financial Health Analysis</strong>:<br>
+            - <strong>Moderate Leverage</strong>: Debt-to-Equity ratio of 1.20 is within typical range<br>
+            - <strong>Strong Profitability</strong>: 25.3% profit margin indicates excellent performance<br>
+            - <strong>Market Leader</strong>: Trillion-dollar market cap indicates dominant market position<br><br>
             <strong>Risk Factors</strong>:<br>
             - Debt-to-equity ratio is within healthy range<br>
             - Strong positive net profit indicates excellent financial health<br>
@@ -663,7 +757,10 @@
             - Technology sector has moderate baseline risk<br><br>
             <strong>Recommendations</strong>:<br>
             - Maintain current financial practices<br>
-            - Annual risk reassessment recommended
+            - Annual risk reassessment recommended<br><br>
+            <strong>Data Sources</strong>:<br>
+            - Yahoo Finance: https://finance.yahoo.com/quote/AAPL<br>
+            - MarketWatch: https://www.marketwatch.com/investing/stock/AAPL
         </div>
     </div>
 
