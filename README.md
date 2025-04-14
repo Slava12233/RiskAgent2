@@ -1,13 +1,15 @@
 # Web Crawler Conversational Agent
 
-A web crawler conversational agent powered by Google's Gemini model that can search and extract information from the internet to answer user queries.
+A web crawler conversational agent powered by Google's Gemini model that can search and extract information from the internet to answer user queries and analyze company risk profiles.
 
 ## Recent Updates
 
+- **Enhanced Risk Engine**: Improved business risk analysis capabilities with detailed sector risk multipliers and better financial metric extraction
 - **Dual Crawler System**: Simple Crawler using requests/BeautifulSoup as the primary crawler with Playwright as fallback
 - **Improved Reliability**: Enhanced retry logic with progressive timeouts (15s, 22.5s, 30s)
 - **Resource Management**: Reduced concurrency (3 workers max) to prevent resource exhaustion
 - **Enhanced Error Handling**: Graceful fallbacks between crawlers with comprehensive logging
+- **E2E Testing**: Comprehensive end-to-end test suite for validating conversation flows and crawler reliability
 - **Improved UI**: Added display of crawled URLs in the interface for transparency
 - **Advanced Content Extraction**: More intelligent extraction of content from various website types
 
@@ -16,6 +18,7 @@ A web crawler conversational agent powered by Google's Gemini model that can sea
 - Natural language conversation with an AI assistant
 - Reliable multi-strategy web crawling to fetch relevant information
 - Support for crawling multiple websites for comprehensive answers
+- **Company risk analysis** using financial data extracted from websites
 - Content summarization for large webpages
 - Provides sources for all information retrieved with visible URLs
 - Beautiful Streamlit user interface
@@ -25,7 +28,7 @@ A web crawler conversational agent powered by Google's Gemini model that can sea
 
 - Python 3.9 or higher
 - Google API Key (Gemini model access)
-- Required packages: requests, BeautifulSoup4, Playwright
+- Required packages: requests, BeautifulSoup4, Playwright, FastAPI (for risk engine)
 
 ## Installation
 
@@ -72,19 +75,30 @@ Alternatively, you can run the Streamlit app directly:
 streamlit run ui/streamlit_app.py
 ```
 
+For risk engine analysis, first start the risk engine server:
+```bash
+cd risk-engine
+python -m app.main
+```
+
 ## How It Works
 
 1. The user enters a query through the Streamlit UI
-2. The agent analyzes the query to determine if web crawling is needed:
+2. The agent analyzes the query to determine if web crawling or risk analysis is needed:
    - Checks for direct URLs
    - Detects multi-site information requests
    - Identifies web search queries
+   - Detects company risk analysis requests
 3. For web crawling, the system uses a dual-crawler approach:
    - **Primary**: Simple Crawler (requests/BeautifulSoup) for reliability
    - **Fallback**: Playwright-based crawler for complex sites
-4. Multiple retry attempts with progressive timeouts ensure maximum content retrieval
-5. The agent formulates a response based on the crawled content and its knowledge
-6. The response is displayed to the user along with links to the source URLs
+4. For company analysis:
+   - Extracts financial data from company websites
+   - Sends data to the Risk Engine for evaluation
+   - Presents risk scores, factors, and recommendations
+5. Multiple retry attempts with progressive timeouts ensure maximum content retrieval
+6. The agent formulates a response based on the crawled content and its knowledge
+7. The response is displayed to the user along with links to the source URLs
 
 ## System Architecture
 
@@ -93,8 +107,31 @@ The system consists of several key components:
 - **Agent (agent.py)**: Core logic for processing messages and orchestrating crawlers
 - **Simple Crawler (simple_crawler.py)**: Primary crawler using requests/BeautifulSoup
 - **Web Crawler (tools/web_crawler.py)**: Secondary crawler using Playwright
+- **Risk Analyzer (risk_analyzer.py)**: Extracts financial data and interfaces with the Risk Engine
+- **Risk Engine (risk-engine/)**: API service for business risk evaluation
 - **UI (ui/streamlit_app.py)**: Streamlit interface for user interaction
 - **Utility Modules**: Error handling, logging, and helper functions
+
+## Risk Analysis
+
+The system can analyze companies for financial risk using five key factors:
+
+1. **Debt-to-Equity Ratio** (30% weight): Measures financial leverage
+2. **Net Profit Assessment** (25% weight): Evaluates company earnings
+3. **Negative News Score** (20% weight): Measures negative sentiment
+4. **Late Payments Rate** (25% weight): Assesses cash flow management
+5. **Sector Risk Multiplier**: Adjusts score based on industry sector
+
+The final risk score is classified into three risk levels:
+- **0-40**: Low Risk
+- **41-70**: Medium Risk
+- **71-100**: High Risk
+
+To perform a risk analysis:
+1. Ask about a company's risk profile and provide its website: "Analyze the risk for Company X https://company-website.com"
+2. The agent will crawl the site, extract metrics, and provide a detailed risk assessment with recommendations
+
+See the [risk.md](risk.md) document for more details on risk analysis methodology.
 
 ## Troubleshooting
 
@@ -141,14 +178,17 @@ Test results are saved as JSON files with timestamps.
 - `agent.py` - The main agent implementation
 - `simple_crawler.py` - Primary web crawler using requests/BeautifulSoup
 - `tools/web_crawler.py` - Secondary web crawler using Playwright
+- `risk_analyzer.py` - Financial data extraction and risk analysis tool
+- `risk-engine/` - Business risk evaluation API service
 - `ui/streamlit_app.py` - Streamlit UI with source URL display
 - `utils/` - Utility functions for error handling and logging
 - `tests/` - Test files including end-to-end conversation tests
 - `test_e2e_conversation.py` - End-to-end test runner
+- `risk.md` - Detailed documentation of risk analysis methodology
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please check out our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 
@@ -159,4 +199,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Google Gemini](https://deepmind.google/technologies/gemini/) for the language model
 - [Requests](https://requests.readthedocs.io/) and [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) for primary crawling
 - [Playwright](https://playwright.dev/) for fallback web crawling capabilities
-- [Streamlit](https://streamlit.io/) for the user interface 
+- [Streamlit](https://streamlit.io/) for the user interface
+- [FastAPI](https://fastapi.tiangolo.com/) for the risk engine API 
