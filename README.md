@@ -4,6 +4,7 @@ A web crawler conversational agent powered by Google's Gemini model that can sea
 
 ## Recent Updates
 
+- **Enhanced Risk Analysis**: Improved company risk analysis with stock data integration, multi-source data collection, and enhanced financial metrics extraction
 - **Enhanced Risk Engine**: Improved business risk analysis capabilities with detailed sector risk multipliers and better financial metric extraction
 - **Dual Crawler System**: Simple Crawler using requests/BeautifulSoup as the primary crawler with Playwright as fallback
 - **Improved Reliability**: Enhanced retry logic with progressive timeouts (15s, 22.5s, 30s)
@@ -18,7 +19,11 @@ A web crawler conversational agent powered by Google's Gemini model that can sea
 - Natural language conversation with an AI assistant
 - Reliable multi-strategy web crawling to fetch relevant information
 - Support for crawling multiple websites for comprehensive answers
-- **Company risk analysis** using financial data extracted from websites
+- **Enhanced company risk analysis** using financial data extracted from multiple sources:
+  - Stock data integration with automatic symbol lookup
+  - Financial metrics extraction (revenue, profits, market cap)
+  - Multiple data sources (Yahoo Finance + company websites)
+  - Detailed financial reporting with appropriate units (billions, millions)
 - Content summarization for large webpages
 - Provides sources for all information retrieved with visible URLs
 - Beautiful Streamlit user interface
@@ -213,10 +218,29 @@ The final risk score is classified into three risk levels:
 - **71-100**: High Risk
 
 To perform a risk analysis:
-1. Ask about a company's risk profile and provide its website: "Analyze the risk for Company X https://company-website.com"
-2. The agent will crawl the site, extract metrics, and provide a detailed risk assessment with recommendations
+1. Ask about a company's risk profile: "Analyze the risk for Apple" or "What's the financial risk of Tesla?"
+2. The agent will automatically:
+   - Identify the company and look up its stock symbol if available
+   - Collect data from financial sources like Yahoo Finance
+   - Extract financial metrics (revenue, profit, market cap, etc.)
+   - Calculate a risk score and provide recommendations
 
-See the [risk.md](risk.md) document for more details on risk analysis methodology.
+### Enhanced Features
+
+Our latest update includes significant improvements to the risk analysis capability:
+
+- **Multiple Data Sources**: Integrates data from both company websites and financial data sources
+- **Stock Symbol Integration**: Automatically looks up stock symbols for well-known companies
+- **Enhanced Metrics**: Extracts revenue, market cap, and more financial metrics
+- **Better Formatting**: Presents financial figures with appropriate units (billions, millions)
+- **Improved Detection**: Better identification of company risk analysis requests
+
+For a detailed overview of this feature, see the [RISK_ANALYSIS.md](RISK_ANALYSIS.md) document.
+
+You can also run a demonstration of the feature:
+```bash
+python demo_risk_analysis.py
+```
 
 ## Troubleshooting
 

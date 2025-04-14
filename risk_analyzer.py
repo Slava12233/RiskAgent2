@@ -53,7 +53,9 @@ def extract_financial_data(content: str) -> Dict[str, Any]:
         "netProfit": 0,       # Break-even by default
         "negativeNewsScore": 0.3,  # Moderate news score by default
         "latePaymentsRate": 0.1,  # Moderate late payments by default
-        "sector": "general"   # Default sector
+        "sector": "general",   # Default sector
+        "revenue": 0,         # Default revenue
+        "marketCap": 0        # Default market cap
     }
     
     # Extract Debt to Equity Ratio
@@ -87,6 +89,54 @@ def extract_financial_data(content: str) -> Dict[str, Any]:
                 if 'million' in content[matches.start():matches.start() + 100] or 'M' in content[matches.start():matches.start() + 100]:
                     profit *= 1000000
                 financial_data["netProfit"] = profit
+                break
+            except ValueError:
+                pass
+    
+    # Extract Revenue figures
+    revenue_patterns = [
+        r'revenue.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)(?:\s*billion|\s*B|\s*million|\s*M)?',
+        r'sales.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)(?:\s*billion|\s*B|\s*million|\s*M)?',
+        r'turnover.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)(?:\s*billion|\s*B|\s*million|\s*M)?'
+    ]
+    for pattern in revenue_patterns:
+        matches = re.search(pattern, content.lower())
+        if matches:
+            try:
+                revenue_str = matches.group(1).replace(',', '')
+                revenue = float(revenue_str)
+                # Check for scale indicators
+                context = content[matches.start():matches.start() + 100].lower()
+                if 'billion' in context or 'B' in context:
+                    revenue *= 1000000000
+                elif 'million' in context or 'M' in context:
+                    revenue *= 1000000
+                financial_data["revenue"] = revenue
+                break
+            except ValueError:
+                pass
+                
+    # Extract market cap information
+    market_cap_patterns = [
+        r'market cap.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)(?:\s*trillion|\s*T|\s*billion|\s*B|\s*million|\s*M)?',
+        r'market capitalization.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)(?:\s*trillion|\s*T|\s*billion|\s*B|\s*million|\s*M)?',
+        r'valuation.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)(?:\s*trillion|\s*T|\s*billion|\s*B|\s*million|\s*M)?'
+    ]
+    for pattern in market_cap_patterns:
+        matches = re.search(pattern, content.lower())
+        if matches:
+            try:
+                cap_str = matches.group(1).replace(',', '')
+                cap = float(cap_str)
+                # Check for scale indicators
+                context = content[matches.start():matches.start() + 100].lower()
+                if 'trillion' in context or 'T' in context:
+                    cap *= 1000000000000
+                elif 'billion' in context or 'B' in context:
+                    cap *= 1000000000
+                elif 'million' in context or 'M' in context:
+                    cap *= 1000000
+                financial_data["marketCap"] = cap
                 break
             except ValueError:
                 pass
@@ -223,11 +273,41 @@ def analyze_company_from_url(url: str, company_name: Optional[str] = None, user_
         company_name = domain.replace('www.', '').split('.')[0].capitalize()
     
     try:
-        # Import the simple crawler for website content extraction
+        # Import the crawler for website content extraction
         try:
             from simple_crawler import crawl_webpage
             logger.info(f"Using simple_crawler to analyze {url}")
             web_content = crawl_webpage(url)
+            
+            # For well-known companies, try to get additional data from financial sites
+            well_known_companies = ["apple", "microsoft", "amazon", "google", "alphabet", "tesla", "meta", "facebook", "netflix"]
+            if company_name.lower() in well_known_companies:
+                logger.info(f"Getting additional financial data for {company_name}")
+                
+                # Get stock symbol
+                stock_symbol = get_stock_symbol(company_name.lower())
+                
+                if stock_symbol:
+                    # Construct URLs for financial data sources
+                    finance_urls = [
+                        f"https://finance.yahoo.com/quote/{stock_symbol}",
+                        f"https://www.marketwatch.com/investing/stock/{stock_symbol}"
+                    ]
+                    
+                    # Crawl financial sites for additional data
+                    finance_content = ""
+                    for finance_url in finance_urls[:1]:  # Limit to first one to avoid excessive crawling
+                        try:
+                            logger.info(f"Crawling financial data from {finance_url}")
+                            finance_content += crawl_webpage(finance_url)
+                        except Exception as e:
+                            logger.warning(f"Failed to crawl {finance_url}: {str(e)}")
+                    
+                    # Combine company website content with financial data
+                    if finance_content:
+                        logger.info("Successfully acquired additional financial data")
+                        web_content += "\n\n" + finance_content
+                
         except ImportError:
             # Fallback to original crawler
             from tools.web_crawler import crawl_webpage_sync
@@ -261,6 +341,31 @@ def analyze_company_from_url(url: str, company_name: Optional[str] = None, user_
             "message": f"An error occurred during analysis: {str(e)}"
         }
 
+def get_stock_symbol(company_name: str) -> Optional[str]:
+    """Get stock symbol for well-known companies."""
+    company_symbols = {
+        "apple": "AAPL",
+        "microsoft": "MSFT",
+        "amazon": "AMZN",
+        "google": "GOOGL",
+        "alphabet": "GOOGL",
+        "tesla": "TSLA",
+        "meta": "META",
+        "facebook": "META",
+        "nvidia": "NVDA",
+        "netflix": "NFLX",
+        "ibm": "IBM",
+        "intel": "INTC",
+        "amd": "AMD",
+        "oracle": "ORCL",
+        "salesforce": "CRM",
+        "walmart": "WMT",
+        "target": "TGT",
+        "boeing": "BA",
+        "disney": "DIS"
+    }
+    return company_symbols.get(company_name.lower())
+
 def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
     """
     Format the risk analysis result for display to users.
@@ -275,6 +380,7 @@ def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
         return f"**Error: {analysis_result['error']}**\n\n{analysis_result.get('message', '')}"
     
     risk_analysis = analysis_result.get("risk_analysis", {})
+    financial_data = risk_analysis.get("financial_data_extracted", {})
     
     formatted_output = f"""## Risk Analysis for {analysis_result.get('company')}
 
@@ -284,8 +390,50 @@ def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
 **Risk Score**: {risk_analysis.get('risk_score')} / 100
 **Risk Level**: {risk_analysis.get('risk_level')}
 
-### Risk Factors
+### Financial Metrics
 """
+    
+    # Add financial metrics if available
+    if financial_data.get("revenue", 0) > 0:
+        revenue = financial_data.get("revenue")
+        if revenue >= 1_000_000_000:
+            formatted_output += f"**Revenue**: ${revenue/1_000_000_000:.2f} billion\n"
+        elif revenue >= 1_000_000:
+            formatted_output += f"**Revenue**: ${revenue/1_000_000:.2f} million\n"
+        else:
+            formatted_output += f"**Revenue**: ${revenue:,.0f}\n"
+    
+    if financial_data.get("marketCap", 0) > 0:
+        market_cap = financial_data.get("marketCap")
+        if market_cap >= 1_000_000_000_000:
+            formatted_output += f"**Market Cap**: ${market_cap/1_000_000_000_000:.2f} trillion\n"
+        elif market_cap >= 1_000_000_000:
+            formatted_output += f"**Market Cap**: ${market_cap/1_000_000_000:.2f} billion\n"
+        else:
+            formatted_output += f"**Market Cap**: ${market_cap/1_000_000:.2f} million\n"
+    
+    formatted_output += f"**Debt-to-Equity Ratio**: {financial_data.get('debtToEquity', 'N/A')}\n"
+    
+    net_profit = financial_data.get("netProfit", 0)
+    if net_profit != 0:
+        if net_profit >= 1_000_000_000:
+            formatted_output += f"**Net Profit**: ${net_profit/1_000_000_000:.2f} billion\n"
+        elif net_profit >= 1_000_000:
+            formatted_output += f"**Net Profit**: ${net_profit/1_000_000:.2f} million\n"
+        elif net_profit < 0:
+            # For losses, show in red
+            if abs(net_profit) >= 1_000_000_000:
+                formatted_output += f"**Net Loss**: ${abs(net_profit)/1_000_000_000:.2f} billion\n"
+            elif abs(net_profit) >= 1_000_000:
+                formatted_output += f"**Net Loss**: ${abs(net_profit)/1_000_000:.2f} million\n"
+            else:
+                formatted_output += f"**Net Loss**: ${abs(net_profit):,.0f}\n"
+        else:
+            formatted_output += f"**Net Profit**: ${net_profit:,.0f}\n"
+    
+    formatted_output += f"**Sector**: {financial_data.get('sector', 'Unknown').capitalize()}\n\n"
+    
+    formatted_output += "### Risk Factors\n"
     
     for explanation in risk_analysis.get("explanations", []):
         formatted_output += f"- {explanation}\n"
@@ -295,10 +443,18 @@ def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
     for recommendation in risk_analysis.get("recommendations", []):
         formatted_output += f"- {recommendation}\n"
     
+    # Add sources of information
+    formatted_output += "\n### Data Sources\n"
+    formatted_output += f"- Company website: {analysis_result.get('website')}\n"
+    
+    # Check if we have financial data from Yahoo Finance
+    if "yahoo.com" in analysis_result.get('website', '') or financial_data.get("marketCap", 0) > 0:
+        formatted_output += "- Financial data sources\n"
+    
     # Add disclaimer
     formatted_output += """
 ### Note
-This risk analysis is based on information extracted automatically from the company website. 
+This risk analysis is based on information extracted automatically from the company website and financial sources. 
 The accuracy of the assessment depends on the quality and completeness of the information available.
 For a comprehensive risk assessment, consult with financial experts.
 """
