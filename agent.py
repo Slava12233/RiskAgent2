@@ -12,7 +12,7 @@ import asyncio
 import json
 import random
 import time
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Tuple
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -138,38 +138,38 @@ class WebCrawlerAgent:
     
     def analyze_company_risk(self, url: str, company_name: Optional[str] = None, user_id: str = "default_user") -> Dict[str, Any]:
         """
-        Analyze a company's risk profile based on its website.
+        Analyze the financial risk of a company given its website URL.
         
         Args:
-            url: The URL of the company website
-            company_name: Optional name of the company
-            user_id: The user ID for tracking
+            url: URL of the company website
+            company_name: Optional company name
+            user_id: Identifier for the user making the request
             
         Returns:
-            Dict containing risk analysis results
+            Dict with risk analysis results or error information
         """
-        if not RISK_ANALYZER_AVAILABLE:
-            return {
-                "error": "Risk analyzer not available",
-                "message": "The risk analyzer module is not available. Please check installation."
-            }
-        
         try:
-            # Call the risk analyzer to analyze the company
+            if not RISK_ANALYZER_AVAILABLE:
+                return {
+                    "error": "Risk Analysis Unavailable",
+                    "message": "The risk analysis module is not available."
+                }
+            
+            # Use risk_analyzer to analyze the company from the URL
+            logger.info(f"Analyzing risk for company: {company_name} at URL: {url}")
             analysis_result = risk_analyzer.analyze_company_from_url(url, company_name, user_id)
             
-            # Format the results for display
-            formatted_result = risk_analyzer.format_risk_analysis_for_display(analysis_result)
+            # Ensure we have all data sources
+            if "data_sources" not in analysis_result and "website" in analysis_result:
+                analysis_result["data_sources"] = [analysis_result["website"]]
+                
+            return analysis_result
             
-            return {
-                "formatted_analysis": formatted_result,
-                "raw_analysis": analysis_result
-            }
         except Exception as e:
-            print(f"Error analyzing company risk: {str(e)}")
+            logger.error(f"Error analyzing company risk: {str(e)}")
             return {
-                "error": "Analysis failed",
-                "message": f"Failed to analyze company risk: {str(e)}"
+                "error": "Analysis Error",
+                "message": f"An error occurred during risk analysis: {str(e)}"
             }
     
     def get_or_create_session(self, user_id: str):
@@ -1102,196 +1102,184 @@ When using the analyze_company_risk tool:
         
         return None
 
-    def process_message(self, user_id: str, message: str) -> Union[str, tuple]:
+    def process_message(self, user_id: str, message: str) -> Tuple[str, List[str]]:
         """
-        Process a message from the user and get agent response.
+        Process a user message and return a response with crawled URLs.
         
         Args:
-            user_id: Unique identifier for the user
-            message: The message text from the user
+            user_id (str): Unique identifier for the user
+            message (str): User message
             
         Returns:
-            Union[str, tuple]: Either the agent's response text or a tuple of (response_text, list_of_crawled_urls)
+            Tuple[str, List[str]]: Response text and list of crawled URLs
         """
-        try:
-            # Get or create session
-            session = self.get_or_create_session(user_id)
+        crawled_urls = []
+        
+        # Check if this is a risk analysis request
+        company_info = self.detect_company_risk_query(message)
+        if company_info:
+            company_name = company_info["company_name"]
+            company_url = company_info["url"]
             
-            # Track crawled URLs
-            crawled_urls = []
+            # Process risk analysis request
+            logger.info(f"Processing risk analysis for company: {company_name}, URL: {company_url}")
             
-            # Check for simple greetings or very short messages first
-            simple_greetings = ["hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening"]
-            if message.lower().strip() in simple_greetings:
-                greeting_response = f"Hello! I'm your web research assistant. What would you like to know?"
-                return (greeting_response, crawled_urls)  # No URLs crawled for greetings
+            # Analyze the company risk
+            risk_result = self.analyze_company_risk(company_url, company_name, user_id)
             
-            if len(message.strip()) < 5:
-                short_response = "Please provide more details about what you'd like to know."
-                return (short_response, crawled_urls)  # No URLs crawled for short messages
+            # Get crawled URLs
+            if "data_sources" in risk_result:
+                crawled_urls.extend(risk_result["data_sources"])
+            else:
+                crawled_urls.append(company_url)
             
-            # Check for company risk analysis request
-            company_info = self.detect_company_risk_query(message)
-            if company_info and RISK_ANALYZER_AVAILABLE:
-                try:
-                    print(f"Analyzing company risk for: {company_info['url']}")
-                    
-                    # Add the URL to crawled URLs
-                    crawled_urls.append(company_info['url'])
-                    
-                    # Analyze the company risk
-                    risk_result = self.analyze_company_risk(
-                        url=company_info['url'],
-                        company_name=company_info.get('company_name'),
-                        user_id=user_id
+            # Format the risk analysis for display
+            risk_analysis_text = risk_analyzer.format_risk_analysis_for_display(risk_result)
+            
+            # Prepend a risk icon to the response
+            response_text = f"🛡️\n{risk_analysis_text}"
+            
+            return response_text, crawled_urls
+        
+        # Check for simple greetings or very short messages first
+        simple_greetings = ["hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening"]
+        if message.lower().strip() in simple_greetings:
+            greeting_response = f"Hello! I'm your web research assistant. What would you like to know?"
+            return greeting_response, crawled_urls  # No URLs crawled for greetings
+        
+        if len(message.strip()) < 5:
+            short_response = "Please provide more details about what you'd like to know."
+            return short_response, crawled_urls  # No URLs crawled for short messages
+        
+        # 1. Check if message has a direct URL
+        url = self.detect_url_in_message(message)
+        if url:
+            print(f"Using simple crawler for URL: {url}")
+            try:
+                if SIMPLE_CRAWLER_AVAILABLE:
+                    # Use simple crawler with retries
+                    content = simple_crawler.crawl_webpage(url, context=message, summary=self.extract_summary_flag(message))
+                    crawled_urls.append(url)
+                else:
+                    # Fall back to original crawler
+                    content = crawl_webpage_sync(url, context=message, summary=self.extract_summary_flag(message))
+                    crawled_urls.append(url)
+                
+                # Generate response from the model using the content
+                prompt = f"""Based on the provided content about {url}, please provide an informative response
+                to the user's query: "{message}"
+                
+                Content:
+                {content}
+                
+                Provide a comprehensive response addressing the user's query specifically. 
+                If the content doesn't fully answer the query, acknowledge the limitations.
+                """
+                
+                response = self.get_or_create_session(user_id).send_message(prompt)
+                return response.text, crawled_urls
+                
+            except Exception as e:
+                print(f"Error using direct URL: {str(e)}")
+                # Continue to other methods if direct URL crawling fails
+                pass
+        
+        # 2. Check if multiple sites information is requested
+        multiple_sites = self.detect_multiple_sites_request(message)
+        if multiple_sites:
+            print(f"Using simple crawler for multiple URLs: {multiple_sites}")
+            try:
+                # Limit to first 3 URLs to reduce load
+                urls_to_crawl = multiple_sites[:3]
+                crawled_urls.extend(urls_to_crawl)
+                
+                if SIMPLE_CRAWLER_AVAILABLE:
+                    # Use simple crawler with reduced concurrency and better error handling
+                    content = simple_crawler.crawl_multiple_webpages_sync(
+                        urls_to_crawl,
+                        context=message,
+                        summary=True
                     )
-                    
-                    if "error" in risk_result:
-                        error_response = f"I tried to analyze the company at {company_info['url']}, but encountered an error: {risk_result.get('message', 'Unknown error')}"
-                        return (error_response, crawled_urls)
-                    
-                    # Return the formatted analysis as the response
-                    return (risk_result['formatted_analysis'], crawled_urls)
-                    
-                except Exception as e:
-                    print(f"Error analyzing company risk: {str(e)}")
-                    error_response = f"I encountered an error while trying to analyze the company risk: {str(e)}"
-                    return (error_response, crawled_urls)
+                else:
+                    # Fall back to original crawler
+                    content = original_crawl_multiple_webpages_sync(
+                        urls_to_crawl,
+                        context=message,
+                        summary=True
+                    )
+                
+                # Generate response from the model using the combined content
+                prompt = f"""Based on the provided content from multiple websites, please provide an informative response
+                to the user's query: "{message}"
+                
+                Content:
+                {content}
+                
+                Provide a comprehensive response addressing the user's query specifically.
+                If the content doesn't fully answer the query, acknowledge the limitations.
+                Summarize the key information from all sources and note any contradictions or differences between them.
+                """
+                
+                response = self.get_or_create_session(user_id).send_message(prompt)
+                return response.text, crawled_urls
             
-            # 1. Check if message has a direct URL
-            url = self.detect_url_in_message(message)
-            if url:
-                print(f"Using simple crawler for URL: {url}")
-                try:
-                    if SIMPLE_CRAWLER_AVAILABLE:
-                        # Use simple crawler with retries
-                        content = simple_crawler.crawl_webpage(url, context=message, summary=self.extract_summary_flag(message))
-                        crawled_urls.append(url)
-                    else:
-                        # Fall back to original crawler
-                        content = crawl_webpage_sync(url, context=message, summary=self.extract_summary_flag(message))
-                        crawled_urls.append(url)
-                    
-                    # Generate response from the model using the content
-                    prompt = f"""Based on the provided content about {url}, please provide an informative response
-                    to the user's query: "{message}"
-                    
-                    Content:
-                    {content}
-                    
-                    Provide a comprehensive response addressing the user's query specifically. 
-                    If the content doesn't fully answer the query, acknowledge the limitations.
-                    """
-                    
-                    response = session.send_message(prompt)
-                    return (response.text, crawled_urls)
-                    
-                except Exception as e:
-                    print(f"Error using direct URL: {str(e)}")
-                    # Continue to other methods if direct URL crawling fails
-                    pass
-            
-            # 2. Check if multiple sites information is requested
-            multiple_sites = self.detect_multiple_sites_request(message)
-            if multiple_sites:
-                print(f"Using simple crawler for multiple URLs: {multiple_sites}")
-                try:
-                    # Limit to first 3 URLs to reduce load
-                    urls_to_crawl = multiple_sites[:3]
-                    crawled_urls.extend(urls_to_crawl)
-                    
-                    if SIMPLE_CRAWLER_AVAILABLE:
-                        # Use simple crawler with reduced concurrency and better error handling
+            except Exception as e:
+                print(f"Error processing multiple sites: {str(e)}")
+                # Continue to other methods if multiple sites crawling fails
+                pass
+        
+        # 3. Check if message is a web search query
+        search_query = self.detect_web_search_query(message)
+        if search_query:
+            print(f"Using simple crawler's search for: {search_query}")
+            try:
+                # Get relevant URLs using simple crawler if available
+                if SIMPLE_CRAWLER_AVAILABLE:
+                    search_urls = simple_crawler.get_relevant_urls(search_query, num_results=3)
+                    if search_urls:
+                        print(f"Using simple crawler for search results URLs: {search_urls}")
+                        crawled_urls.extend(search_urls)
                         content = simple_crawler.crawl_multiple_webpages_sync(
-                            urls_to_crawl,
+                            search_urls,
                             context=message,
                             summary=True
                         )
-                    else:
-                        # Fall back to original crawler
+                else:
+                    # Fall back to original methods
+                    search_urls = get_relevant_urls(search_query, num_results=3)
+                    if search_urls:
+                        print(f"Using original crawler for search results URLs: {search_urls}")
+                        crawled_urls.extend(search_urls)
                         content = original_crawl_multiple_webpages_sync(
-                            urls_to_crawl,
+                            search_urls,
                             context=message,
                             summary=True
                         )
-                    
-                    # Generate response from the model using the combined content
-                    prompt = f"""Based on the provided content from multiple websites, please provide an informative response
-                    to the user's query: "{message}"
+                
+                if search_urls:
+                    # Generate response from the model using the content
+                    prompt = f"""Based on the provided content from a web search for "{search_query}", 
+                    please provide an informative response to the user's query: "{message}"
                     
                     Content:
                     {content}
                     
                     Provide a comprehensive response addressing the user's query specifically.
                     If the content doesn't fully answer the query, acknowledge the limitations.
-                    Summarize the key information from all sources and note any contradictions or differences between them.
                     """
                     
-                    response = session.send_message(prompt)
-                    return (response.text, crawled_urls)
-                
-                except Exception as e:
-                    print(f"Error processing multiple sites: {str(e)}")
-                    # Continue to other methods if multiple sites crawling fails
-                    pass
-            
-            # 3. Check if message is a web search query
-            search_query = self.detect_web_search_query(message)
-            if search_query:
-                print(f"Using simple crawler's search for: {search_query}")
-                try:
-                    # Get relevant URLs using simple crawler if available
-                    if SIMPLE_CRAWLER_AVAILABLE:
-                        search_urls = simple_crawler.get_relevant_urls(search_query, num_results=3)
-                        if search_urls:
-                            print(f"Using simple crawler for search results URLs: {search_urls}")
-                            crawled_urls.extend(search_urls)
-                            content = simple_crawler.crawl_multiple_webpages_sync(
-                                search_urls,
-                                context=message,
-                                summary=True
-                            )
-                    else:
-                        # Fall back to original methods
-                        search_urls = get_relevant_urls(search_query, num_results=3)
-                        if search_urls:
-                            print(f"Using original crawler for search results URLs: {search_urls}")
-                            crawled_urls.extend(search_urls)
-                            content = original_crawl_multiple_webpages_sync(
-                                search_urls,
-                                context=message,
-                                summary=True
-                            )
-                    
-                    if search_urls:
-                        # Generate response from the model using the content
-                        prompt = f"""Based on the provided content from a web search for "{search_query}", 
-                        please provide an informative response to the user's query: "{message}"
-                        
-                        Content:
-                        {content}
-                        
-                        Provide a comprehensive response addressing the user's query specifically.
-                        If the content doesn't fully answer the query, acknowledge the limitations.
-                        """
-                        
-                        response = session.send_message(prompt)
-                        return (response.text, crawled_urls)
-                except Exception as e:
-                    print(f"Error processing web search query: {str(e)}")
-                    # Continue to other methods if search query fails
-                    pass
-            
-            # 4. Default to regular chat without web crawling if all other methods fail
-            print("Using standard processing without web crawling")
-            # Send the message directly to the model
-            response = session.send_message(message)
-            return (response.text, crawled_urls)
-            
-        except Exception as e:
-            print(f"Error in process_message: {str(e)}")
-            error_message = get_user_friendly_error_message(str(e))
-            return (f"I encountered an error: {error_message}. Please try a different query or rephrase your question.", [])
+                    response = self.get_or_create_session(user_id).send_message(prompt)
+                    return response.text, crawled_urls
+            except Exception as e:
+                print(f"Error processing web search query: {str(e)}")
+                # Continue to other methods if search query fails
+                pass
+        
+        # 4. Default to regular chat without web crawling if all other methods fail
+        print("Using standard processing without web crawling")
+        # Send the message directly to the model
+        response = self.get_or_create_session(user_id).send_message(message)
+        return response.text, crawled_urls
 
 
 # Create a singleton instance

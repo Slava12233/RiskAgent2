@@ -296,10 +296,12 @@ def analyze_company_from_url(url: str, company_name: Optional[str] = None, user_
                     
                     # Crawl financial sites for additional data
                     finance_content = ""
-                    for finance_url in finance_urls[:1]:  # Limit to first one to avoid excessive crawling
+                    crawled_finance_urls = []
+                    for finance_url in finance_urls:  # Use all financial sources
                         try:
                             logger.info(f"Crawling financial data from {finance_url}")
                             finance_content += crawl_webpage(finance_url)
+                            crawled_finance_urls.append(finance_url)
                         except Exception as e:
                             logger.warning(f"Failed to crawl {finance_url}: {str(e)}")
                     
@@ -328,10 +330,18 @@ def analyze_company_from_url(url: str, company_name: Optional[str] = None, user_
                 "message": "The risk evaluation failed for an unknown reason."
             }
         
+        # Track all data sources used
+        data_sources = [url]  # Start with the main company URL
+        
+        # Add any finance URLs that were crawled
+        if 'crawled_finance_urls' in locals():
+            data_sources.extend(crawled_finance_urls)
+        
         return {
             "company": company_name,
             "website": url,
-            "risk_analysis": evaluation_result
+            "risk_analysis": evaluation_result,
+            "data_sources": data_sources  # Include all data sources
         }
     
     except Exception as e:
@@ -393,7 +403,7 @@ def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
 ### Financial Metrics
 """
     
-    # Add financial metrics if available
+    # Add financial metrics if available with more detail
     if financial_data.get("revenue", 0) > 0:
         revenue = financial_data.get("revenue")
         if revenue >= 1_000_000_000:
@@ -431,9 +441,51 @@ def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
         else:
             formatted_output += f"**Net Profit**: ${net_profit:,.0f}\n"
     
+    if financial_data.get("negativeNewsScore") is not None:
+        formatted_output += f"**Negative News Score**: {financial_data.get('negativeNewsScore'):.2f} (0-1 scale, higher is worse)\n"
+    
+    if financial_data.get("latePaymentsRate") is not None:
+        formatted_output += f"**Late Payments Rate**: {financial_data.get('latePaymentsRate'):.2f} (0-1 scale)\n"
+    
     formatted_output += f"**Sector**: {financial_data.get('sector', 'Unknown').capitalize()}\n\n"
     
-    formatted_output += "### Risk Factors\n"
+    # Add financial health summary
+    formatted_output += "### Financial Health Analysis\n"
+    
+    # Debt-to-Equity analysis
+    de_ratio = financial_data.get("debtToEquity", 0)
+    if de_ratio > 0:
+        if de_ratio < 1.0:
+            formatted_output += f"- **Low Leverage**: Debt-to-Equity ratio of {de_ratio:.2f} indicates conservative financing\n"
+        elif de_ratio < 2.0:
+            formatted_output += f"- **Moderate Leverage**: Debt-to-Equity ratio of {de_ratio:.2f} is within typical range\n"
+        else:
+            formatted_output += f"- **High Leverage**: Debt-to-Equity ratio of {de_ratio:.2f} suggests high financial risk\n"
+    
+    # Profitability analysis
+    if net_profit > 0:
+        profit_margin = (net_profit / financial_data.get("revenue", 1)) * 100 if financial_data.get("revenue", 0) > 0 else 0
+        if profit_margin > 20:
+            formatted_output += f"- **Strong Profitability**: {profit_margin:.1f}% profit margin indicates excellent performance\n"
+        elif profit_margin > 10:
+            formatted_output += f"- **Good Profitability**: {profit_margin:.1f}% profit margin is above average\n"
+        else:
+            formatted_output += f"- **Moderate Profitability**: {profit_margin:.1f}% profit margin indicates adequate performance\n"
+    elif net_profit < 0:
+        formatted_output += f"- **Unprofitable**: Company is operating at a loss, which increases financial risk\n"
+    
+    # Market position analysis
+    if financial_data.get("marketCap", 0) > 0:
+        if financial_data.get("marketCap", 0) > 1_000_000_000_000:
+            formatted_output += f"- **Market Leader**: Trillion-dollar market cap indicates dominant market position\n"
+        elif financial_data.get("marketCap", 0) > 100_000_000_000:
+            formatted_output += f"- **Large Cap**: Strong market position with substantial capitalization\n"
+        elif financial_data.get("marketCap", 0) > 10_000_000_000:
+            formatted_output += f"- **Mid Cap**: Established market player with room for growth\n"
+        else:
+            formatted_output += f"- **Small Cap**: Smaller market presence, potentially higher volatility\n"
+    
+    formatted_output += "\n### Risk Factors\n"
     
     for explanation in risk_analysis.get("explanations", []):
         formatted_output += f"- {explanation}\n"
@@ -443,13 +495,28 @@ def format_risk_analysis_for_display(analysis_result: Dict[str, Any]) -> str:
     for recommendation in risk_analysis.get("recommendations", []):
         formatted_output += f"- {recommendation}\n"
     
-    # Add sources of information
+    # Add sources of information with more detail
     formatted_output += "\n### Data Sources\n"
-    formatted_output += f"- Company website: {analysis_result.get('website')}\n"
     
-    # Check if we have financial data from Yahoo Finance
-    if "yahoo.com" in analysis_result.get('website', '') or financial_data.get("marketCap", 0) > 0:
-        formatted_output += "- Financial data sources\n"
+    # List all data sources used for analysis
+    data_sources = analysis_result.get("data_sources", [analysis_result.get('website')])
+    
+    # Company website
+    company_website = analysis_result.get('website')
+    if company_website in data_sources:
+        formatted_output += f"- Company website: {company_website}\n"
+    
+    # Financial data sources
+    finance_sources = [url for url in data_sources if "finance.yahoo.com" in url or "marketwatch.com" in url]
+    if finance_sources:
+        formatted_output += "- Financial data sources:\n"
+        for source in finance_sources:
+            if "yahoo.com" in source:
+                formatted_output += f"  - Yahoo Finance: {source}\n"
+            elif "marketwatch.com" in source:
+                formatted_output += f"  - Market Watch: {source}\n"
+            else:
+                formatted_output += f"  - {source}\n"
     
     # Add disclaimer
     formatted_output += """
