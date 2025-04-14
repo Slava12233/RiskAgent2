@@ -1,0 +1,11 @@
+track:
+  - "*.py" # Track all Python files
+  - "*.md" # Track all Markdown files
+  - "requirements.txt" # Track dependencies
+
+ignore:
+  - "Libraries/" # Ignore the libraries directory
+  - "__pycache__/" # Ignore Python cache
+  - "*.pyc" # Ignore compiled Python files
+  - ".venv/" # Ignore virtual environment
+  - "*.log" # Ignore log files

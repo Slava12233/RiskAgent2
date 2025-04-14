@@ -1,0 +1,13 @@
+[
+  {
+    "scenario": {
+      "name": "News Query",
+      "query": "What are the latest developments in the Israel-Gaza conflict?",
+      "expected_behavior": "The agent should detect this as a news query, find relevant news websites, and crawl them for information about the Israel-Gaza conflict."
+    },
+    "response": "I apologize, but I'm unable to provide you with the latest developments in the Israel-Gaza conflict at this time.  The web crawling tool I use encountered an error (\"Executable doesn't exist...\").  This means the necessary browser components haven't been properly installed or configured to access and process web pages.  Therefore, I cannot fetch current news articles or reports to give you an accurate and up-to-date answer.\n\nTo get the information you need, I suggest you try searching directly on reputable news websites such as the BBC, Reuters, Associated Press, or The New York Times.  These sources typically provide comprehensive and timely coverage of international conflicts.  You can also search Google News for \"Israel-Gaza conflict\" to find a variety of news sources covering the situation.\n\nI understand this is frustrating, and I am working to resolve the web crawling issue.  Please let me know if you have any other questions I can answer without needing to access external websites.\n",
+    "duration": 23.364545106887817,
+    "success": true,
+    "timestamp": "2025-04-14T00:16:38.204656"
+  }
+]

@@ -1,0 +1,21 @@
+track:
+  # Learn from our project structure and implementation
+  - "**/*.py" # All Python files 
+  - "**/*.md" # All Markdown files
+  - "requirements.txt" # Dependencies
+
+prioritize:
+  # Most important files for understanding the project
+  - "agent.py" # Core agent implementation
+  - "tools/web_crawler.py" # Crawler tool
+  - "ui/streamlit_app.py" # UI implementation
+  - "main.py" # Entry point
+  - "PLANNING.md" # Overall architecture
+  - "TASK.md" # Implementation tasks
+
+ignore:
+  # Avoid learning from these patterns
+  - "Libraries/**" # External libraries
+  - "__pycache__/**" # Cache files
+  - "**/*.pyc" # Compiled Python files
+  - ".venv/**" # Virtual environment
