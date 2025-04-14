@@ -30,15 +30,89 @@ The Web Crawler Agent with Risk Engine integration combines web crawling capabil
 
 ### High-level System Architecture
 
-![System Architecture](https://mermaid.ink/img/pako:eNp1ksFuwjAMhl8l8nnqhRKgTOXQ9Tj1MPbcplws4tYRBALlsCkV734xaLSqm5PY_v3bsVOfiNASaUJCYWSrNN6os4LPhcbKtrKR5mur8PpWOyi0bcG-NA1cf8huvDn-yQ3y-uDBVUL2KqjvDcjNnWshZTRsFBS6KCGxsdyAvXLUXF-KxkRWaJIOJL3D7g4bUW07KbRCHVQQJSzZCod2tITWTg6a18sdlPi3_0M5qzy__LPCEi6_7vNlYqpKbbjCRgWnQb6NlDswDI1couJOOMhv-Qg_7Wtbq0r-GVFdYXRFsQitGyn4SuzxlelpRmzf2wYTTlhY7pE2ZT8zmr0nUWBS2BFUK9P2HdxzbvGMCccyzYQKW4olpbYzMieche3dUAWT0wUxhxwsSIs_coRbi74NJJwYmybRLI7WcbxarNP4kaUP6ZLcx3Mnh1Tfp-E0v_ChD4s?type=png)
+```mermaid
+graph LR
+    User((User)) --> UI[Streamlit UI]
+    UI --> Agent
+    Agent --> WebCrawler[Web Crawler]
+    Agent --> RiskEngine[Risk Engine]
+    WebCrawler --> Internet((Internet))
+    Internet --> WebCrawler
+    RiskEngine --> DB[(Database)]
+    WebCrawler --> Agent
+    RiskEngine --> Agent
+    Agent --> UI
+    UI --> User
+
+    style User fill:#3498db,stroke:#333,stroke-width:2px
+    style UI fill:#2ecc71,stroke:#333,stroke-width:2px
+    style Agent fill:#9b59b6,stroke:#333,stroke-width:2px
+    style WebCrawler fill:#e74c3c,stroke:#333,stroke-width:2px
+    style RiskEngine fill:#f39c12,stroke:#333,stroke-width:2px
+    style Internet fill:#34495e,stroke:#333,stroke-width:2px,color:#fff
+    style DB fill:#1abc9c,stroke:#333,stroke-width:2px
+```
 
 ### Process Flow Diagram
 
-![Process Flow](https://mermaid.ink/img/pako:eNqNktFLwzAQxv9KyPMKfVC7dTJfRB9kDxvzLZRwaZe1mCbNLdMy9n-XpNMOMsEcSe77fb97uNw7EVpCTAIKI1ul8UbtFTwXGivbykaaz63Cy1vlQK5tC_alaeByJbvxmORXbpRXGw-OEvJWQdzjQK7vXAspow5BrhcJCYzlAJamXTvOFY2JjNCkHZyy0Wo1quHzATtRbToptEIdtB9FjEmFA9vPhsZOT56wl_MSFPo_rS-oWZ35-a9GluLsyz43IzNVasN7bFTwaJAvI-UM5sExHKHiVlj4bfF0b_ZrW6sazpfhWcKZmsIQWjdS8L14h1emJxGxfa0bDDhhYQ5H2pR9z4wIUeSZFBYC1cq0fQdPnFucMeHYDBMqbCmWJLazkCecJe3cWAXzL0tiDjkkSIu_cwRbi74NJBwZmybRLI7WcbxarNP4iaUP6ZLc53Mnh1Tfp-E8v_ABkbM?type=png)
+```mermaid
+flowchart TD
+    A((Start)) --> B[User Enters Message]
+    B --> C{Message Type?}
+    C -->|Web Crawling Request| D[Web Crawling]
+    C -->|Risk Analysis Request| E[Risk Analysis]
+    D --> F[Process Content]
+    E --> G[Process Risk Data]
+    F --> H[Generate Response]
+    G --> H
+    H --> I((End))
+
+    style A fill:#3498db,stroke:#333,stroke-width:2px
+    style B fill:#9b59b6,stroke:#333,stroke-width:2px
+    style C fill:#f39c12,stroke:#333,stroke-width:2px
+    style D fill:#e74c3c,stroke:#333,stroke-width:2px
+    style E fill:#2ecc71,stroke:#333,stroke-width:2px
+    style F fill:#1abc9c,stroke:#333,stroke-width:2px
+    style G fill:#1abc9c,stroke:#333,stroke-width:2px
+    style H fill:#3498db,stroke:#333,stroke-width:2px
+    style I fill:#7f8c8d,stroke:#333,stroke-width:2px
+```
 
 ### Risk Analysis Process Flow
 
-![Risk Analysis](https://mermaid.ink/img/pako:eNp9k8tuwyAQRX9lxDpKF7bjJHGqrlp1UbXbLrsZMQwxlcEWOK5c5d9LwK7tKEIrM8y5cxy4PBCtBY0Jr6G2opUSVuqg4V5JqEwreqG_txKuNpWFXJoG9GvTwNVadMMprF9dobrpOThKqE4G8T4Cen_jXAgRDRDk-i2mtRIchOEXxflG1CaygpPUqPYWusbXQ2-GW9GV3w7UWkk96kAVMCSYA9f3g8FODh533fdT6Plvw3_Yxzfr05_sntVpd4q9mo28m1qoAQk2CgM0Q7CTI0MoS7MQwILa9i1GnPTa9zOO0wqqgJbtqN2FDJeZXDVNx3AbDNzOPpwUVsVaRfhLz35Hf3qqMSGWlcX2FQTZyoxUU92yj4jyeqBqT47t7OkpUf7zfEBrKL0l9T_bZc_6PpCsQ5ZpP09mwaKKi3i5WCXxA0nukhW9L2aHw1Ddp-E8-wGF6_aJ?type=png)
+```mermaid
+flowchart LR
+    A[Company Website] --> B[Web Crawler]
+    B --> C[Content Extraction]
+    C --> D[Financial Data<br>Extraction]
+    D --> E[Risk Engine]
+    E --> F[Risk Factors<br>Evaluation]
+    F --> G[Final Score<br>Calculation]
+    G --> H[Risk Assessment]
+    H --> I[Response to User]
+
+    subgraph Metrics
+        M1[Debt-to-Equity Ratio]
+        M2[Net Profit]
+        M3[Negative News]
+        M4[Late Payments]
+        M5[Sector Risk]
+    end
+
+    D --> Metrics
+    Metrics --> F
+
+    style A fill:#3498db,stroke:#333,stroke-width:2px
+    style B fill:#e74c3c,stroke:#333,stroke-width:2px
+    style C fill:#9b59b6,stroke:#333,stroke-width:2px
+    style D fill:#f39c12,stroke:#333,stroke-width:2px
+    style E fill:#2ecc71,stroke:#333,stroke-width:2px
+    style F fill:#1abc9c,stroke:#333,stroke-width:2px
+    style G fill:#3498db,stroke:#333,stroke-width:2px
+    style H fill:#9b59b6,stroke:#333,stroke-width:2px
+    style I fill:#34495e,stroke:#333,stroke-width:2px,color:#fff
+    style Metrics fill:#ecf0f1,stroke:#333,stroke-width:2px
+```
 
 ### Key Components
 
