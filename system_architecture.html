@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Crawler Agent with Risk Engine - System Architecture</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .diagram {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        .diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .diagram-caption {
+            margin-top: 15px;
+            font-style: italic;
+            color: #555;
+        }
+        .component {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .risk-factor {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .risk-factor-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        .risk-factor-description {
+            flex: 3;
+        }
+        .risk-factor-weight {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .risk-levels {
+            display: flex;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .risk-level {
+            flex: 1;
+            padding: 10px;
+            margin: 0 5px;
+            border-radius: 5px;
+        }
+        .low-risk {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .medium-risk {
+            background-color: #f39c12;
+            color: white;
+        }
+        .high-risk {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .code-block {
+            background-color: #f8f8f8;
+            border-left: 3px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        .note {
+            background-color: #ffffcc;
+            border-left: 4px solid #ffeb3b;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Web Crawler Agent with Risk Engine</h1>
+        <p>System Architecture and Process Flow Documentation</p>
+    </header>
+
+    <div class="container">
+        <h2>System Overview</h2>
+        <p>
+            The Web Crawler Agent with Risk Engine integration is a sophisticated system that combines web crawling capabilities
+            with financial risk assessment. The system allows users to interact with a conversational agent that can extract financial
+            information from company websites and analyze the company's risk profile.
+        </p>
+
+        <div class="diagram">
+            <svg width="800" height="400" viewBox="0 0 800 400">
+                <!-- Background -->
+                <rect x="0" y="0" width="800" height="400" fill="#f8f8f8" rx="10" ry="10" />
+                
+                <!-- User -->
+                <circle cx="100" cy="200" r="40" fill="#3498db" />
+                <text x="100" y="205" text-anchor="middle" fill="white" font-weight="bold">User</text>
+                
+                <!-- Streamlit UI -->
+                <rect x="200" y="160" width="120" height="80" rx="5" ry="5" fill="#2ecc71" />
+                <text x="260" y="205" text-anchor="middle" fill="white" font-weight="bold">Streamlit UI</text>
+                
+                <!-- Agent -->
+                <rect x="380" y="160" width="120" height="80" rx="5" ry="5" fill="#9b59b6" />
+                <text x="440" y="205" text-anchor="middle" fill="white" font-weight="bold">Agent</text>
+                
+                <!-- Web Crawler -->
+                <rect x="560" y="70" width="120" height="80" rx="5" ry="5" fill="#e74c3c" />
+                <text x="620" y="115" text-anchor="middle" fill="white" font-weight="bold">Web Crawler</text>
+                
+                <!-- Risk Engine -->
+                <rect x="560" y="250" width="120" height="80" rx="5" ry="5" fill="#f39c12" />
+                <text x="620" y="295" text-anchor="middle" fill="white" font-weight="bold">Risk Engine</text>
+                
+                <!-- Connections -->
+                <line x1="140" y1="200" x2="200" y2="200" stroke="#333" stroke-width="2" />
+                <line x1="320" y1="200" x2="380" y2="200" stroke="#333" stroke-width="2" />
+                <line x1="500" y1="175" x2="560" y2="120" stroke="#333" stroke-width="2" />
+                <line x1="500" y1="225" x2="560" y2="280" stroke="#333" stroke-width="2" />
+                
+                <!-- Arrows -->
+                <polygon points="198,200 190,196 190,204" fill="#333" />
+                <polygon points="378,200 370,196 370,204" fill="#333" />
+                <polygon points="558,120 550,116 550,124" fill="#333" />
+                <polygon points="558,280 550,276 550,284" fill="#333" />
+                
+                <!-- Labels -->
+                <text x="170" y="190" text-anchor="middle" fill="#555">Queries</text>
+                <text x="350" y="190" text-anchor="middle" fill="#555">Messages</text>
+                <text x="520" y="145" text-anchor="middle" fill="#555">Web Crawling</text>
+                <text x="520" y="255" text-anchor="middle" fill="#555">Risk Analysis</text>
+            </svg>
+            <div class="diagram-caption">
+                Figure 1: High-level System Architecture
+            </div>
+        </div>
+
+        <h3>Key Components</h3>
+        <ul>
+            <li><strong>Streamlit UI</strong>: The user interface built with Streamlit that allows users to interact with the agent</li>
+            <li><strong>Agent</strong>: The core component that processes user messages and orchestrates web crawling and risk analysis</li>
+            <li><strong>Web Crawler</strong>: Dual-crawler system with Simple Crawler (requests/BeautifulSoup) as primary and Playwright as fallback</li>
+            <li><strong>Risk Engine</strong>: FastAPI-based service that evaluates company risk based on financial metrics</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>Process Flow</h2>
+        <p>
+            The system follows a specific flow to process user requests, crawl websites, and analyze risk.
+        </p>
+
+        <div class="diagram">
+            <svg width="800" height="600" viewBox="0 0 800 600">
+                <!-- Background -->
+                <rect x="0" y="0" width="800" height="600" fill="#f8f8f8" rx="10" ry="10" />
+                
+                <!-- Start -->
+                <circle cx="400" cy="50" r="30" fill="#3498db" />
+                <text x="400" y="55" text-anchor="middle" fill="white" font-weight="bold">Start</text>
+                
+                <!-- Process 1: User Input -->
+                <rect x="300" y="120" width="200" height="60" rx="5" ry="5" fill="#9b59b6" />
+                <text x="400" y="155" text-anchor="middle" fill="white" font-weight="bold">User Enters Message</text>
+                
+                <!-- Decision 1: Message Type -->
+                <polygon points="400,220 450,270 400,320 350,270" fill="#f39c12" />
+                <text x="400" y="275" text-anchor="middle" fill="white" font-weight="bold">Message Type?</text>
+                
+                <!-- Process 2: Web Crawling -->
+                <rect x="150" y="360" width="180" height="60" rx="5" ry="5" fill="#e74c3c" />
+                <text x="240" y="395" text-anchor="middle" fill="white" font-weight="bold">Web Crawling</text>
+                
+                <!-- Process 3: Risk Analysis -->
+                <rect x="470" y="360" width="180" height="60" rx="5" ry="5" fill="#2ecc71" />
+                <text x="560" y="395" text-anchor="middle" fill="white" font-weight="bold">Risk Analysis</text>
+                
+                <!-- Process 4: Generate Response -->
+                <rect x="300" y="470" width="200" height="60" rx="5" ry="5" fill="#3498db" />
+                <text x="400" y="505" text-anchor="middle" fill="white" font-weight="bold">Generate Response</text>
+                
+                <!-- End -->
+                <circle cx="400" cy="570" r="30" fill="#7f8c8d" />
+                <text x="400" y="575" text-anchor="middle" fill="white" font-weight="bold">End</text>
+                
+                <!-- Connections -->
+                <line x1="400" y1="80" x2="400" y2="120" stroke="#333" stroke-width="2" />
+                <line x1="400" y1="180" x2="400" y2="220" stroke="#333" stroke-width="2" />
+                <line x1="350" y1="270" x2="240" y2="360" stroke="#333" stroke-width="2" />
+                <line x1="450" y1="270" x2="560" y2="360" stroke="#333" stroke-width="2" />
+                <line x1="240" y1="420" x2="350" y2="470" stroke="#333" stroke-width="2" />
+                <line x1="560" y1="420" x2="450" y2="470" stroke="#333" stroke-width="2" />
+                <line x1="400" y1="530" x2="400" y2="540" stroke="#333" stroke-width="2" />
+                
+                <!-- Arrows -->
+                <polygon points="400,118 396,110 404,110" fill="#333" />
+                <polygon points="400,218 396,210 404,210" fill="#333" />
+                <polygon points="240,358 236,350 244,350" fill="#333" />
+                <polygon points="560,358 556,350 564,350" fill="#333" />
+                <polygon points="350,468 342,464 342,472" fill="#333" />
+                <polygon points="450,468 458,464 458,472" fill="#333" />
+                <polygon points="400,538 396,530 404,530" fill="#333" />
+                
+                <!-- Labels -->
+                <text x="310" y="250" text-anchor="end" fill="#555">Web Crawling Request</text>
+                <text x="490" y="250" text-anchor="start" fill="#555">Risk Analysis Request</text>
+                <text x="280" y="445" text-anchor="middle" fill="#555">Website Content</text>
+                <text x="520" y="445" text-anchor="middle" fill="#555">Risk Assessment</text>
+            </svg>
+            <div class="diagram-caption">
+                Figure 2: Process Flow Diagram
+            </div>
+        </div>
+
+        <h3>Process Steps</h3>
+        <ol>
+            <li>
+                <strong>User Input Processing</strong>: The agent analyzes the user's message to determine if it's a web crawling request, risk analysis request, or general query
+            </li>
+            <li>
+                <strong>Command Detection</strong>: The agent uses pattern matching to identify website URLs or commands (e.g., "scrape Tesla website")
+            </li>
+            <li>
+                <strong>Web Crawling</strong>: If the request requires web crawling, the agent:
+                <ul>
+                    <li>Tries the Simple Crawler first (requests/BeautifulSoup)</li>
+                    <li>Falls back to Playwright crawler if needed</li>
+                    <li>Uses progressive retries with increasing timeouts</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Risk Analysis</strong>: If the request is for company risk analysis, the agent:
+                <ul>
+                    <li>Crawls the company website</li>
+                    <li>Extracts financial metrics using pattern matching</li>
+                    <li>Sends the data to the Risk Engine API</li>
+                    <li>Processes and formats the risk assessment results</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Response Generation</strong>: The agent formulates a response based on the crawled content or risk analysis results
+            </li>
+        </ol>
+    </div>
+
+    <div class="container">
+        <h2>Risk Analysis Process</h2>
+        <p>
+            The risk analysis process involves extracting financial metrics from website content and evaluating company risk.
+        </p>
+
+        <div class="diagram">
+            <svg width="800" height="500" viewBox="0 0 800 500">
+                <!-- Background -->
+                <rect x="0" y="0" width="800" height="500" fill="#f8f8f8" rx="10" ry="10" />
+                
+                <!-- Company Website -->
+                <rect x="50" y="50" width="150" height="80" rx="5" ry="5" fill="#3498db" />
+                <text x="125" y="95" text-anchor="middle" fill="white" font-weight="bold">Company Website</text>
+                
+                <!-- Web Crawler -->
+                <rect x="50" y="200" width="150" height="80" rx="5" ry="5" fill="#e74c3c" />
+                <text x="125" y="245" text-anchor="middle" fill="white" font-weight="bold">Web Crawler</text>
+                
+                <!-- Content Extraction -->
+                <rect x="250" y="200" width="150" height="80" rx="5" ry="5" fill="#9b59b6" />
+                <text x="325" y="245" text-anchor="middle" fill="white" font-weight="bold">Content Extraction</text>
+                
+                <!-- Financial Metrics -->
+                <rect x="450" y="200" width="150" height="80" rx="5" ry="5" fill="#f39c12" />
+                <text x="525" y="230" text-anchor="middle" fill="white" font-weight="bold">Financial</text>
+                <text x="525" y="260" text-anchor="middle" fill="white" font-weight="bold">Metrics Extraction</text>
+                
+                <!-- Risk Engine -->
+                <rect x="650" y="200" width="150" height="80" rx="5" ry="5" fill="#2ecc71" />
+                <text x="725" y="245" text-anchor="middle" fill="white" font-weight="bold">Risk Engine</text>
+                
+                <!-- Risk Assessment -->
+                <rect x="350" y="350" width="150" height="80" rx="5" ry="5" fill="#1abc9c" />
+                <text x="425" y="390" text-anchor="middle" fill="white" font-weight="bold">Risk Assessment</text>
+                
+                <!-- Connections -->
+                <line x1="125" y1="130" x2="125" y2="200" stroke="#333" stroke-width="2" />
+                <line x1="200" y1="240" x2="250" y2="240" stroke="#333" stroke-width="2" />
+                <line x1="400" y1="240" x2="450" y2="240" stroke="#333" stroke-width="2" />
+                <line x1="600" y1="240" x2="650" y2="240" stroke="#333" stroke-width="2" />
+                <line x1="725" y1="280" x2="725" y2="320" stroke="#333" stroke-width="2" />
+                <line x1="725" y1="320" x2="450" y2="350" stroke="#333" stroke-width="2" />
+                
+                <!-- Arrows -->
+                <polygon points="125,198 121,190 129,190" fill="#333" />
+                <polygon points="248,240 240,236 240,244" fill="#333" />
+                <polygon points="448,240 440,236 440,244" fill="#333" />
+                <polygon points="648,240 640,236 640,244" fill="#333" />
+                <polygon points="450,348 455,340 445,340" fill="#333" />
+                
+                <!-- Metrics Labels -->
+                <rect x="520" y="100" width="120" height="25" rx="5" ry="5" fill="#e74c3c" />
+                <text x="580" y="118" text-anchor="middle" fill="white" font-size="12">Debt-to-Equity</text>
+                
+                <rect x="520" y="130" width="120" height="25" rx="5" ry="5" fill="#f39c12" />
+                <text x="580" y="148" text-anchor="middle" fill="white" font-size="12">Net Profit</text>
+                
+                <rect x="520" y="160" width="120" height="25" rx="5" ry="5" fill="#2ecc71" />
+                <text x="580" y="178" text-anchor="middle" fill="white" font-size="12">News Sentiment</text>
+                
+                <rect x="650" y="100" width="120" height="25" rx="5" ry="5" fill="#3498db" />
+                <text x="710" y="118" text-anchor="middle" fill="white" font-size="12">Late Payments</text>
+                
+                <rect x="650" y="130" width="120" height="25" rx="5" ry="5" fill="#9b59b6" />
+                <text x="710" y="148" text-anchor="middle" fill="white" font-size="12">Business Sector</text>
+                
+                <!-- Lines to Metrics -->
+                <line x1="525" y1="200" x2="580" y2="125" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="200" x2="580" y2="155" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="200" x2="580" y2="185" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="200" x2="710" y2="125" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+                <line x1="525" y1="200" x2="710" y2="155" stroke="#333" stroke-width="1" stroke-dasharray="4,2" />
+            </svg>
+            <div class="diagram-caption">
+                Figure 3: Risk Analysis Process Flow
+            </div>
+        </div>
+
+        <h3>Risk Factors and Weights</h3>
+        <div class="risk-factor">
+            <div class="risk-factor-name">Debt-to-Equity Ratio</div>
+            <div class="risk-factor-description">
+                Measures a company's financial leverage by comparing total debt to shareholders' equity. 
+                Higher ratios indicate higher financial risk.
+            </div>
+            <div class="risk-factor-weight">30%</div>
+        </div>
+        <div class="risk-factor">
+            <div class="risk-factor-name">Net Profit</div>
+            <div class="risk-factor-description">
+                The company's bottom-line earnings after all expenses, taxes, and costs.
+                Negative values significantly increase risk assessment.
+            </div>
+            <div class="risk-factor-weight">25%</div>
+        </div>
+        <div class="risk-factor">
+            <div class="risk-factor-name">Negative News</div>
+            <div class="risk-factor-description">
+                Measure of negative sentiment in news and content about the company.
+                Calculated by analyzing frequency of negative terms.
+            </div>
+            <div class="risk-factor-weight">20%</div>
+        </div>
+        <div class="risk-factor">
+            <div class="risk-factor-name">Late Payments</div>
+            <div class="risk-factor-description">
+                Rate of late payments to suppliers and creditors, indicating potential cash flow issues.
+            </div>
+            <div class="risk-factor-weight">25%</div>
+        </div>
+
+        <h3>Risk Levels</h3>
+        <div class="risk-levels">
+            <div class="risk-level low-risk">
+                <h4>Low Risk</h4>
+                <p>Score: 0-40</p>
+            </div>
+            <div class="risk-level medium-risk">
+                <h4>Medium Risk</h4>
+                <p>Score: 41-70</p>
+            </div>
+            <div class="risk-level high-risk">
+                <h4>High Risk</h4>
+                <p>Score: 71-100</p>
+            </div>
+        </div>
+
+        <h3>Risk Score Calculation</h3>
+        <div class="code-block">
+            Final Score = (Weighted Sum of Risk Factors) × Sector Multiplier × 100
+        </div>
+
+        <h3>Sector Adjustments</h3>
+        <table>
+            <tr>
+                <th>Sector</th>
+                <th>Risk Multiplier</th>
+                <th>Risk Level</th>
+            </tr>
+            <tr>
+                <td>Healthcare</td>
+                <td>0.9</td>
+                <td>Lower Risk</td>
+            </tr>
+            <tr>
+                <td>Utilities</td>
+                <td>0.85</td>
+                <td>Lower Risk</td>
+            </tr>
+            <tr>
+                <td>Technology</td>
+                <td>1.0</td>
+                <td>Average Risk</td>
+            </tr>
+            <tr>
+                <td>General</td>
+                <td>1.0</td>
+                <td>Average Risk</td>
+            </tr>
+            <tr>
+                <td>Retail</td>
+                <td>1.1</td>
+                <td>Higher Risk</td>
+            </tr>
+            <tr>
+                <td>Real Estate</td>
+                <td>1.15</td>
+                <td>Higher Risk</td>
+            </tr>
+            <tr>
+                <td>Finance</td>
+                <td>1.2</td>
+                <td>Higher Risk</td>
+            </tr>
+            <tr>
+                <td>Energy/Oil/Gas</td>
+                <td>1.3</td>
+                <td>Much Higher Risk</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Financial Metrics Extraction</h2>
+        <p>
+            The system uses pattern matching to extract financial metrics from company websites.
+        </p>
+
+        <div class="diagram">
+            <svg width="800" height="350" viewBox="0 0 800 350">
+                <!-- Background -->
+                <rect x="0" y="0" width="800" height="350" fill="#f8f8f8" rx="10" ry="10" />
+                
+                <!-- Website Content -->
+                <rect x="50" y="50" width="300" height="250" rx="5" ry="5" fill="#ecf0f1" stroke="#bdc3c7" />
+                <text x="200" y="80" text-anchor="middle" fill="#333" font-weight="bold">Website Content</text>
+                
+                <rect x="70" y="100" width="260" height="180" rx="5" ry="5" fill="#f9f9f9" stroke="#ddd" />
+                <text x="80" y="120" fill="#333" font-size="12">... The company reported a debt-to-equity</text>
+                <text x="80" y="140" fill="#333" font-size="12">ratio of 1.5 for the fiscal year ... </text>
+                <text x="80" y="170" fill="#333" font-size="12">... Net profit decreased to -$2.3 million</text>
+                <text x="80" y="190" fill="#333" font-size="12">due to increased operating expenses ...</text>
+                <text x="80" y="220" fill="#333" font-size="12">... Our technology sector outlook remains</text>
+                <text x="80" y="240" fill="#333" font-size="12">positive despite market challenges ...</text>
+                
+                <!-- Regex Patterns -->
+                <rect x="450" y="50" width="300" height="250" rx="5" ry="5" fill="#3498db" />
+                <text x="600" y="80" text-anchor="middle" fill="white" font-weight="bold">Regex Patterns</text>
+                
+                <rect x="470" y="110" width="260" height="30" rx="5" ry="5" fill="#2980b9" />
+                <text x="600" y="130" text-anchor="middle" fill="white" font-size="12">debt[\s-]to[\s-]equity.*?(\d+\.\d+)</text>
+                
+                <rect x="470" y="150" width="260" height="30" rx="5" ry="5" fill="#2980b9" />
+                <text x="600" y="170" text-anchor="middle" fill="white" font-size="12">net profit.*?\$?(\d+(?:,\d+)*(?:\.\d+)?)</text>
+                
+                <rect x="470" y="190" width="260" height="30" rx="5" ry="5" fill="#2980b9" />
+                <text x="600" y="210" text-anchor="middle" fill="white" font-size="12">sector keywords detection</text>
+                
+                <rect x="470" y="230" width="260" height="30" rx="5" ry="5" fill="#2980b9" />
+                <text x="600" y="250" text-anchor="middle" fill="white" font-size="12">negative sentiment analysis</text>
+                
+                <!-- Arrows -->
+                <line x1="350" y1="130" x2="470" y2="125" stroke="#333" stroke-width="2" />
+                <polygon points="468,125 460,121 460,129" fill="#333" />
+                
+                <line x1="350" y1="180" x2="470" y2="165" stroke="#333" stroke-width="2" />
+                <polygon points="468,165 460,161 460,169" fill="#333" />
+                
+                <line x1="350" y1="230" x2="470" y2="205" stroke="#333" stroke-width="2" />
+                <polygon points="468,205 460,201 460,209" fill="#333" />
+            </svg>
+            <div class="diagram-caption">
+                Figure 4: Financial Metrics Extraction Process
+            </div>
+        </div>
+
+        <h3>Extraction Techniques</h3>
+        <ul>
+            <li>
+                <strong>Debt-to-Equity Ratio</strong>: Regex patterns to find mentions of debt-to-equity followed by numeric values
+            </li>
+            <li>
+                <strong>Net Profit</strong>: Patterns to extract profit/earnings figures, handling different formats ($2.3 million, $2,300,000)
+            </li>
+            <li>
+                <strong>Sector Detection</strong>: Keyword frequency analysis to determine the most likely business sector
+            </li>
+            <li>
+                <strong>Negative News Score</strong>: Counting occurrences of negative terms relative to total content length
+            </li>
+            <li>
+                <strong>Late Payments Rate</strong>: Usually defaulted to a moderate value (0.1) as it's difficult to extract reliably
+            </li>
+        </ul>
+
+        <div class="note">
+            <strong>Note:</strong> When specific metrics can't be found, the system uses default values:
+            <ul>
+                <li>Debt-to-Equity Ratio: 2.0 (moderate risk)</li>
+                <li>Net Profit: 0 (break-even)</li>
+                <li>Negative News Score: 0.3 (moderate)</li>
+                <li>Late Payments Rate: 0.1 (moderate)</li>
+                <li>Sector: "general" (standard risk multiplier)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Implementation Details</h2>
+
+        <h3>Web Crawler Components</h3>
+        <ul>
+            <li><strong>Simple Crawler</strong>: Uses requests and BeautifulSoup, provides better reliability and faster performance</li>
+            <li><strong>Playwright Crawler</strong>: Used as a fallback for complex websites, handles JavaScript-heavy pages</li>
+            <li><strong>Retry Logic</strong>: Progressive retries with increasing timeouts (15s, 22.5s, 30s)</li>
+            <li><strong>Concurrency Management</strong>: Limited to 3 workers to prevent resource exhaustion</li>
+        </ul>
+
+        <h3>Risk Engine API</h3>
+        <ul>
+            <li><strong>FastAPI Framework</strong>: High-performance API with automatic documentation</li>
+            <li><strong>SQLAlchemy ORM</strong>: Database interactions for storing risk evaluations</li>
+            <li><strong>Risk Calculator</strong>: Core logic for calculating risk scores based on financial metrics</li>
+            <li><strong>Recommendation Engine</strong>: Generates tailored recommendations based on risk profile and business sector</li>
+        </ul>
+
+        <h3>Agent Message Processing</h3>
+        <ul>
+            <li><strong>Command Detection</strong>: Identifies web crawling commands (e.g., "scrape Tesla website")</li>
+            <li><strong>URL Construction</strong>: Automatically constructs URLs for known companies (e.g., "Apple" → "https://www.apple.com")</li>
+            <li><strong>Risk Query Detection</strong>: Identifies risk analysis requests (e.g., "analyze risk for Company X")</li>
+            <li><strong>Response Formatting</strong>: Formats risk assessments with scores, factors, and recommendations</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>Example Workflow</h2>
+        <p>Let's walk through a complete example of a risk analysis request:</p>
+
+        <h3>1. User sends message:</h3>
+        <div class="code-block">
+            "Analyze the risk for Tesla https://www.tesla.com/investor"
+        </div>
+
+        <h3>2. Agent detects risk analysis request</h3>
+        <ul>
+            <li>Identifies "analyze risk" as a risk analysis request</li>
+            <li>Extracts "Tesla" as the company name</li>
+            <li>Identifies "https://www.tesla.com/investor" as the URL to crawl</li>
+        </ul>
+
+        <h3>3. Web crawler extracts content</h3>
+        <ul>
+            <li>Simple Crawler retrieves the content from Tesla's investor relations page</li>
+            <li>Content is processed to remove HTML tags and extract plain text</li>
+        </ul>
+
+        <h3>4. Financial metrics extraction</h3>
+        <ul>
+            <li>The system uses pattern matching to extract financial data</li>
+            <li>For example, it might find:</li>
+            <ul>
+                <li>Debt-to-Equity Ratio: 1.2</li>
+                <li>Net Profit: $5.5 billion</li>
+                <li>Sector: Detected as "technology" (with automobile keywords)</li>
+                <li>Negative News Score: 0.15 (calculated from content analysis)</li>
+                <li>Late Payments Rate: 0.1 (default value)</li>
+            </ul>
+        </ul>
+
+        <h3>5. Risk Engine calculation</h3>
+        <ul>
+            <li>Data is sent to the Risk Engine API</li>
+            <li>API calculates a weighted score based on the factors</li>
+            <li>Basic calculation: (0.3 * 0.5 + 0.25 * 0.1 + 0.2 * 0.2 + 0.25 * 0.4) * 1.0 * 100 = 30.0</li>
+            <li>Risk level determined as "Low Risk" (score < 40)</li>
+            <li>Recommendations generated based on the low risk profile</li>
+        </ul>
+
+        <h3>6. Response presentation</h3>
+        <div class="code-block">
+            <strong>Risk Analysis for Tesla</strong><br><br>
+            <strong>Risk Score</strong>: 30.0 / 100<br>
+            <strong>Risk Level</strong>: Low Risk<br><br>
+            <strong>Risk Factors</strong>:<br>
+            - Debt-to-equity ratio is within healthy range<br>
+            - Strong positive net profit indicates excellent financial health<br>
+            - Low negative news coverage<br>
+            - Moderate rate of late payments<br>
+            - Technology sector has moderate baseline risk<br><br>
+            <strong>Recommendations</strong>:<br>
+            - Maintain current financial practices<br>
+            - Annual risk reassessment recommended
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; padding: 20px; color: #777; border-top: 1px solid #eee;">
+        <p>Web Crawler Agent with Risk Engine Documentation</p>
+        <p>Last updated: April 14, 2025</p>
+    </footer>
+</body>
+</html> 
