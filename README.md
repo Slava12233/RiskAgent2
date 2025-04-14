@@ -24,6 +24,29 @@ A web crawler conversational agent powered by Google's Gemini model that can sea
 - Beautiful Streamlit user interface
 - Comprehensive logging system
 
+## System Architecture
+
+The Web Crawler Agent with Risk Engine integration combines web crawling capabilities with financial risk assessment. The system allows users to interact with a conversational agent that can extract financial information from company websites and analyze the company's risk profile.
+
+### High-level System Architecture
+
+![System Architecture](https://mermaid.ink/img/pako:eNp1ksFuwjAMhl8l8nnqhRKgTOXQ9Tj1MPbcplws4tYRBALlsCkV734xaLSqm5PY_v3bsVOfiNASaUJCYWSrNN6os4LPhcbKtrKR5mur8PpWOyi0bcG-NA1cf8huvDn-yQ3y-uDBVUL2KqjvDcjNnWshZTRsFBS6KCGxsdyAvXLUXF-KxkRWaJIOJL3D7g4bUW07KbRCHVQQJSzZCod2tITWTg6a18sdlPi3_0M5qzy__LPCEi6_7vNlYqpKbbjCRgWnQb6NlDswDI1couJOOMhv-Qg_7Wtbq0r-GVFdYXRFsQitGyn4SuzxlelpRmzf2wYTTlhY7pE2ZT8zmr0nUWBS2BFUK9P2HdxzbvGMCccyzYQKW4olpbYzMieche3dUAWT0wUxhxwsSIs_coRbi74NJJwYmybRLI7WcbxarNP4kaUP6ZLcx3Mnh1Tfp-E0v_ChD4s?type=png)
+
+### Process Flow Diagram
+
+![Process Flow](https://mermaid.ink/img/pako:eNqNktFLwzAQxv9KyPMKfVC7dTJfRB9kDxvzLZRwaZe1mCbNLdMy9n-XpNMOMsEcSe77fb97uNw7EVpCTAIKI1ul8UbtFTwXGivbykaaz63Cy1vlQK5tC_alaeByJbvxmORXbpRXGw-OEvJWQdzjQK7vXAspow5BrhcJCYzlAJamXTvOFY2JjNCkHZyy0Wo1quHzATtRbToptEIdtB9FjEmFA9vPhsZOT56wl_MSFPo_rS-oWZ35-a9GluLsyz43IzNVasN7bFTwaJAvI-UM5sExHKHiVlj4bfF0b_ZrW6sazpfhWcKZmsIQWjdS8L14h1emJxGxfa0bDDhhYQ5H2pR9z4wIUeSZFBYC1cq0fQdPnFucMeHYDBMqbCmWJLazkCecJe3cWAXzL0tiDjkkSIu_cwRbi74NJBwZmybRLI7WcbxarNP4iaUP6ZLc53Mnh1Tfp-E8v_ABkbM?type=png)
+
+### Risk Analysis Process Flow
+
+![Risk Analysis](https://mermaid.ink/img/pako:eNp9k8tuwyAQRX9lxDpKF7bjJHGqrlp1UbXbLrsZMQwxlcEWOK5c5d9LwK7tKEIrM8y5cxy4PBCtBY0Jr6G2opUSVuqg4V5JqEwreqG_txKuNpWFXJoG9GvTwNVadMMprF9dobrpOThKqE4G8T4Cen_jXAgRDRDk-i2mtRIchOEXxflG1CaygpPUqPYWusbXQ2-GW9GV3w7UWkk96kAVMCSYA9f3g8FODh533fdT6Plvw3_Yxzfr05_sntVpd4q9mo28m1qoAQk2CgM0Q7CTI0MoS7MQwILa9i1GnPTa9zOO0wqqgJbtqN2FDJeZXDVNx3AbDNzOPpwUVsVaRfhLz35Hf3qqMSGWlcX2FQTZyoxUU92yj4jyeqBqT47t7OkpUf7zfEBrKL0l9T_bZc_6PpCsQ5ZpP09mwaKKi3i5WCXxA0nukhW9L2aHw1Ddp-E8-wGF6_aJ?type=png)
+
+### Key Components
+
+- **Streamlit UI**: The user interface built with Streamlit that allows users to interact with the agent
+- **Agent**: The core component that processes user messages and orchestrates web crawling and risk analysis
+- **Web Crawler**: Dual-crawler system with Simple Crawler (requests/BeautifulSoup) as primary and Playwright as fallback
+- **Risk Engine**: FastAPI-based service that evaluates company risk based on financial metrics
+
 ## Prerequisites
 
 - Python 3.9 or higher
@@ -99,18 +122,6 @@ python -m app.main
 5. Multiple retry attempts with progressive timeouts ensure maximum content retrieval
 6. The agent formulates a response based on the crawled content and its knowledge
 7. The response is displayed to the user along with links to the source URLs
-
-## System Architecture
-
-The system consists of several key components:
-
-- **Agent (agent.py)**: Core logic for processing messages and orchestrating crawlers
-- **Simple Crawler (simple_crawler.py)**: Primary crawler using requests/BeautifulSoup
-- **Web Crawler (tools/web_crawler.py)**: Secondary crawler using Playwright
-- **Risk Analyzer (risk_analyzer.py)**: Extracts financial data and interfaces with the Risk Engine
-- **Risk Engine (risk-engine/)**: API service for business risk evaluation
-- **UI (ui/streamlit_app.py)**: Streamlit interface for user interaction
-- **Utility Modules**: Error handling, logging, and helper functions
 
 ## Risk Analysis
 
